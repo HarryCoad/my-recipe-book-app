@@ -1,33 +1,40 @@
 import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import classes from './NavLinkGroup.module.scss';
-import { IconCalendarStats, IconChevronRight } from '@tabler/icons-react';
-import { Box, Collapse, Group, Text, ThemeIcon, UnstyledButton } from '@mantine/core';
+import { IconChevronRight } from '@tabler/icons-react';
+import { Box, Collapse, Group, ThemeIcon, UnstyledButton } from '@mantine/core';
 
-interface LinksGroupProps {
+export interface LinksGroupProps {
   icon: React.FC<any>;
   label: string;
   initiallyOpened?: boolean;
   links?: { label: string; link: string }[];
+  link?: string;
 }
 
-export function LinksGroup({ icon: Icon, label, initiallyOpened, links }: LinksGroupProps) {
+export function NavLinkGroup({ icon: Icon, label, initiallyOpened, links, link }: LinksGroupProps) {
+  const pathname = usePathname();
+
   const hasLinks = Array.isArray(links);
-  const [opened, setOpened] = useState(initiallyOpened || false);
-  const items = (hasLinks ? links : []).map((link) => (
-    <Text<'a'>
-      component="a"
-      className={classes.link}
-      href={link.link}
-      key={link.label}
-      onClick={(event) => event.preventDefault()}
-    >
+  const [opened, setOpened] = useState(
+    links?.some((lk) => lk.link === pathname) || initiallyOpened || false
+  );
+  const items = (hasLinks ? links : []).map((link, i) => (
+    <Link key={i} href={link.link} className={classes.link}>
       {link.label}
-    </Text>
+    </Link>
   ));
 
   return (
     <>
-      <UnstyledButton onClick={() => setOpened((o) => !o)} className={classes.control}>
+      <UnstyledButton
+        component={link ? Link : undefined}
+        // @ts-ignore
+        href={link ? link : undefined}
+        onClick={() => setOpened((o) => !o)}
+        className={classes.control}
+      >
         <Group justify="space-between" gap={0}>
           <Box style={{ display: 'flex', alignItems: 'center' }}>
             <ThemeIcon variant="light" size={30}>
@@ -47,23 +54,5 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, links }: LinksG
       </UnstyledButton>
       {hasLinks ? <Collapse in={opened}>{items}</Collapse> : null}
     </>
-  );
-}
-
-const mockdata = {
-  label: 'Releases',
-  icon: IconCalendarStats,
-  links: [
-    { label: 'Upcoming releases', link: '/' },
-    { label: 'Previous releases', link: '/' },
-    { label: 'Releases schedule', link: '/' },
-  ],
-};
-
-export function NavbarLinksGroup() {
-  return (
-    <Box mih={220} p="md">
-      <LinksGroup {...mockdata} />
-    </Box>
   );
 }
