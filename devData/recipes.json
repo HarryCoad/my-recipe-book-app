@@ -1,0 +1,659 @@
+[
+  {
+    "id": "67a6a8041b2c22d8c2eb1cd7",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Spicy Chickpea Curry",
+    "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Recusandae ea minus quisquam magni blanditiis mollitia, reiciendis nesciunt et ut veritatis reprehenderit repudiandae animi tenetur dolorem! Iusto placeat facere aut quam neque error voluptatibus enim veniam fuga accusamus rerum, expedita modi voluptates ducimus est. Earum minus velit incidunt. Consequuntur maxime mollitia voluptas quos eum, fugit voluptatibus doloremque dolor dolore nemo dolores nam sequi odio magnam cumque! Vero, blanditiis voluptatibus accusamus eveniet iure molestiae, consequuntur beatae veniam autem quisquam earum aperiam cupiditate provident suscipit, repellat sint facere enim unde exercitationem animi voluptates. Id expedita et tenetur ut quisquam recusandae sed qui accusantium?",
+    "image": "https://abh.ai/cats/400",
+    "category": "Main",
+    "serves": 4,
+    "prepTime": 10,
+    "cookTime": 30,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 400,
+        "name": "Chickpeas",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cd8"
+      },
+      {
+        "subheader": null,
+        "quantity": 400,
+        "name": "Coconut Milk",
+        "unit": "ml",
+        "id": "67a6a8041b2c22d8c2eb1cd9"
+      },
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Tomato Puree",
+        "unit": "ml",
+        "id": "67a6a8041b2c22d8c2eb1cda"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Onion",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1cdb"
+      },
+      {
+        "subheader": null,
+        "quantity": 3,
+        "name": "Garlic",
+        "unit": "cloves",
+        "id": "67a6a8041b2c22d8c2eb1cdc"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Ginger",
+        "unit": "tsp",
+        "id": "67a6a8041b2c22d8c2eb1cdd"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Turmeric",
+        "unit": "tsp",
+        "id": "67a6a8041b2c22d8c2eb1cde"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Curry Powder",
+        "unit": "tsp",
+        "id": "67a6a8041b2c22d8c2eb1cdf"
+      }
+    ],
+    "steps": [
+      "Saut\u00e9 onions, garlic, and ginger in a pan.",
+      "Add tomato puree and spices, cook for 5 minutes.",
+      "Stir in chickpeas and coconut milk, simmer for 20 minutes.",
+      "Serve with rice or naan."
+    ],
+    "tags": ["Vegan", "Indian", "Spicy", "Gluten-Free"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1ce0",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Mediterranean Hummus Wrap",
+    "description": "A healthy wrap filled with hummus and fresh vegetables.",
+    "image": "https://abh.ai/cats/400",
+    "category": "Lunch",
+    "serves": 2,
+    "prepTime": 10,
+    "cookTime": 0,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Whole Wheat Wrap",
+        "unit": "pieces",
+        "id": "67a6a8041b2c22d8c2eb1ce1"
+      },
+      {
+        "subheader": null,
+        "quantity": 4,
+        "name": "Hummus",
+        "unit": "tbsp",
+        "id": "67a6a8041b2c22d8c2eb1ce2"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Cucumber",
+        "unit": "small",
+        "id": "67a6a8041b2c22d8c2eb1ce3"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Tomato",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1ce4"
+      },
+      {
+        "subheader": null,
+        "quantity": 50,
+        "name": "Lettuce",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1ce5"
+      },
+      {
+        "subheader": null,
+        "quantity": 50,
+        "name": "Olives",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1ce6"
+      }
+    ],
+    "steps": [
+      "Spread hummus on the wrap.",
+      "Layer with sliced cucumber, tomato, lettuce, and olives.",
+      "Roll the wrap tightly and slice in half."
+    ],
+    "tags": ["Vegan", "Mediterranean", "Healthy", "Quick"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1ce7",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Miso Soup with Tofu",
+    "description": "A simple and comforting miso soup with tofu and seaweed.",
+    "image": "https://abh.ai/cats/400",
+    "category": "Main",
+    "serves": 2,
+    "prepTime": 5,
+    "cookTime": 10,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Miso Paste",
+        "unit": "tbsp",
+        "id": "67a6a8041b2c22d8c2eb1ce8"
+      },
+      {
+        "subheader": null,
+        "quantity": 500,
+        "name": "Water",
+        "unit": "ml",
+        "id": "67a6a8041b2c22d8c2eb1ce9"
+      },
+      {
+        "subheader": null,
+        "quantity": 150,
+        "name": "Tofu",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cea"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Green Onions",
+        "unit": "pieces",
+        "id": "67a6a8041b2c22d8c2eb1ceb"
+      },
+      {
+        "subheader": null,
+        "quantity": 5,
+        "name": "Seaweed",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cec"
+      }
+    ],
+    "steps": [
+      "Boil water and dissolve miso paste.",
+      "Add diced tofu and chopped seaweed.",
+      "Simmer for 5 minutes and serve with green onions."
+    ],
+    "tags": ["Vegan", "Japanese", "Light", "Gluten-Free"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1ced",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Vegan Mushroom Stroganoff",
+    "description": "A creamy mushroom stroganoff made with coconut cream and served over pasta.",
+    "image": null,
+    "category": "Main",
+    "serves": 2,
+    "prepTime": 15,
+    "cookTime": 25,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Mushrooms",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cee"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Onion",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1cef"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Garlic",
+        "unit": "cloves",
+        "id": "67a6a8041b2c22d8c2eb1cf0"
+      },
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Vegetable Broth",
+        "unit": "ml",
+        "id": "67a6a8041b2c22d8c2eb1cf1"
+      },
+      {
+        "subheader": null,
+        "quantity": 100,
+        "name": "Coconut Cream",
+        "unit": "ml",
+        "id": "67a6a8041b2c22d8c2eb1cf2"
+      },
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Pasta",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cf3"
+      }
+    ],
+    "steps": [
+      "Saut\u00e9 onions, garlic, and mushrooms until soft.",
+      "Add vegetable broth and simmer for 10 minutes.",
+      "Stir in coconut cream and serve over cooked pasta."
+    ],
+    "tags": ["Vegan", "Russian", "Comfort Food"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1d02",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Vegan Sushi Rolls",
+    "description": "Homemade sushi rolls filled with fresh vegetables.",
+    "image": null,
+    "category": "Sharer",
+    "serves": 2,
+    "prepTime": 20,
+    "cookTime": 10,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Sushi Rice",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1d03"
+      },
+      {
+        "subheader": null,
+        "quantity": 4,
+        "name": "Nori Sheets",
+        "unit": "pieces",
+        "id": "67a6a8041b2c22d8c2eb1d04"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Cucumber",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1d05"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Avocado",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1d06"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Carrot",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1d07"
+      }
+    ],
+    "steps": [
+      "Cook sushi rice and let it cool.",
+      "Slice cucumber, avocado, and carrot into thin strips.",
+      "Place rice on nori sheets, add vegetables, and roll tightly.",
+      "Cut into bite-sized pieces and serve."
+    ],
+    "tags": ["Vegan", "Japanese", "Gluten-Free"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1d08",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Vegan Ratatouille",
+    "description": "A classic French dish made with layered vegetables.",
+    "image": "https://abh.ai/cats/400",
+    "category": "Main",
+    "serves": 4,
+    "prepTime": 15,
+    "cookTime": 45,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Eggplant",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1d09"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Zucchini",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1d0a"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Bell Pepper",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1d0b"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Tomato",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1d0c"
+      },
+      {
+        "subheader": null,
+        "quantity": 3,
+        "name": "Garlic",
+        "unit": "cloves",
+        "id": "67a6a8041b2c22d8c2eb1d0d"
+      }
+    ],
+    "steps": [
+      "Slice all vegetables.",
+      "Layer them in a baking dish and drizzle with olive oil.",
+      "Bake for 40 minutes at 180\u00b0C (350\u00b0F)."
+    ],
+    "tags": ["Vegan", "French", "Healthy"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1cce",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Vegan Pad Thai",
+    "description": "A quick and easy vegan pad thai with tofu and vegetables.",
+    "image": "https://abh.ai/cats/400",
+    "category": "Main",
+    "serves": 2,
+    "prepTime": 15,
+    "cookTime": 20,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Rice Noodles",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1ccf"
+      },
+      {
+        "subheader": null,
+        "quantity": 150,
+        "name": "Tofu",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cd0"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Peanut Butter",
+        "unit": "tbsp",
+        "id": "67a6a8041b2c22d8c2eb1cd1"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Soy Sauce",
+        "unit": "tbsp",
+        "id": "67a6a8041b2c22d8c2eb1cd2"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Lime Juice",
+        "unit": "tbsp",
+        "id": "67a6a8041b2c22d8c2eb1cd3"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Garlic",
+        "unit": "cloves",
+        "id": "67a6a8041b2c22d8c2eb1cd4"
+      },
+      {
+        "subheader": null,
+        "quantity": 100,
+        "name": "Bean Sprouts",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cd5"
+      },
+      {
+        "subheader": null,
+        "quantity": 50,
+        "name": "Peanuts",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cd6"
+      }
+    ],
+    "steps": [
+      "Cook rice noodles according to package instructions.",
+      "Saut\u00e9 tofu in a pan until golden brown.",
+      "Mix peanut butter, soy sauce, lime juice, and garlic into a sauce.",
+      "Toss noodles, tofu, and sauce together.",
+      "Top with bean sprouts and crushed peanuts."
+    ],
+    "tags": ["Vegan", "Asian", "Thai", "Gluten-Free"],
+    "savedBy": [
+      {
+        "$oid": "67aa79c55d34d340eed9c77d"
+      },
+      {
+        "$oid": "67a272327c42615e739e15f5"
+      }
+    ],
+    "bDeleted": false
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1cf4",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Vegan Tacos",
+    "description": "Delicious tacos filled with black beans and avocado.",
+    "image": null,
+    "category": "Sharer",
+    "serves": 3,
+    "prepTime": 15,
+    "cookTime": 10,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 6,
+        "name": "Corn Tortillas",
+        "unit": "pieces",
+        "id": "67a6a8041b2c22d8c2eb1cf5"
+      },
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Black Beans",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cf6"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Avocado",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1cf7"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Tomato",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1cf8"
+      },
+      {
+        "subheader": null,
+        "quantity": 10,
+        "name": "Cilantro",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cf9"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Lime",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1cfa"
+      }
+    ],
+    "steps": [
+      "Heat the tortillas on a pan.",
+      "Mash the avocado and season with lime juice.",
+      "Layer black beans, avocado, diced tomato, and cilantro on tortillas.",
+      "Serve immediately."
+    ],
+    "tags": ["Vegan", "Mexican", "Gluten-Free"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1d0e",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Vegan Falafel",
+    "image": "https://abh.ai/cats/400",
+    "description": "Crispy falafel made with chickpeas and spices.",
+    "category": "Lunch",
+    "serves": 4,
+    "prepTime": 15,
+    "cookTime": 20,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 250,
+        "name": "Chickpeas",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1d0f"
+      },
+      {
+        "subheader": null,
+        "quantity": 3,
+        "name": "Garlic",
+        "unit": "cloves",
+        "id": "67a6a8041b2c22d8c2eb1d10"
+      },
+      {
+        "subheader": null,
+        "quantity": 20,
+        "name": "Cilantro",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1d11"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Cumin",
+        "unit": "tsp",
+        "id": "67a6a8041b2c22d8c2eb1d12"
+      }
+    ],
+    "steps": [
+      "Blend all ingredients into a paste.",
+      "Form small patties and bake or fry.",
+      "Serve with hummus or tahini sauce."
+    ],
+    "tags": ["Vegan", "Middle Eastern", "Gluten-Free"],
+    "savedBy": []
+  },
+  {
+    "id": "67a6a8041b2c22d8c2eb1cfb",
+    "authorId": "67a272327c42615e739e15f5",
+    "authorType": "User",
+    "bPrivate": false,
+    "bAllowSuggestions": false,
+    "title": "Vegan Lentil Soup",
+    "description": "A hearty lentil soup with vegetables and spices.",
+    "image": null,
+    "category": "Starter",
+    "serves": 4,
+    "prepTime": 10,
+    "cookTime": 30,
+    "ingredients": [
+      {
+        "subheader": null,
+        "quantity": 200,
+        "name": "Lentils",
+        "unit": "g",
+        "id": "67a6a8041b2c22d8c2eb1cfc"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Carrot",
+        "unit": "medium",
+        "id": "67a6a8041b2c22d8c2eb1cfd"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Celery",
+        "unit": "pieces",
+        "id": "67a6a8041b2c22d8c2eb1cfe"
+      },
+      {
+        "subheader": null,
+        "quantity": 2,
+        "name": "Tomato Paste",
+        "unit": "tbsp",
+        "id": "67a6a8041b2c22d8c2eb1cff"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Vegetable Broth",
+        "unit": "liter",
+        "id": "67a6a8041b2c22d8c2eb1d00"
+      },
+      {
+        "subheader": null,
+        "quantity": 1,
+        "name": "Cumin",
+        "unit": "tsp",
+        "id": "67a6a8041b2c22d8c2eb1d01"
+      }
+    ],
+    "steps": [
+      "Saut\u00e9 carrot and celery.",
+      "Add tomato paste, cumin, and lentils.",
+      "Pour in vegetable broth and simmer for 25 minutes.",
+      "Blend for a smooth texture if desired."
+    ],
+    "tags": ["Vegan", "Middle Eastern", "Soup"],
+    "savedBy": []
+  }
+]
