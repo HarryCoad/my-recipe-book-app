@@ -1,5 +1,6 @@
 import { isAxiosError } from 'axios';
-import { APIError } from '@/helpers/axios';
+// Type-only, because axios.ts imports this file
+import type { APIError } from '@/helpers/axios';
 
 // Friendly text for the API's error codes (see ../my-recipe-book/docs/API.md#error-codes)
 export const errorMessages: Record<string, string> = {
@@ -50,4 +51,18 @@ export const getErrorMessage = (err: unknown): string => {
     }
   }
   return getMessageForCode(getErrorCode(err));
+};
+
+// What the API's `protect` middleware sends when the token is no longer usable. Other 401s, such
+// as INVALID_CREDENTIALS or INVALID_FIELDNAME, don't mean the session has ended.
+const SESSION_ENDED_MESSAGES = [
+  'Invalid token',
+  'Token expired',
+  'Password recently changed!',
+  'User no longer exists',
+];
+
+export const isSessionEnded = (err: unknown) => {
+  const code = getErrorCode(err);
+  return !!code && SESSION_ENDED_MESSAGES.includes(code);
 };

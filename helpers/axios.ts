@@ -1,7 +1,7 @@
-// lib/axios.ts
 import axios, { AxiosResponse } from 'axios';
 import { clearAuth, getToken } from '@/helpers/auth';
 import { Routes } from '@/helpers/constants';
+import { isSessionEnded } from '@/helpers/errors';
 
 export type APIResponse<T> = {
   data: T;
@@ -37,20 +37,12 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// What the API's `protect` middleware sends when the token is no longer usable. Other 401s, such
-// as INVALID_CREDENTIALS or INVALID_FIELDNAME, don't mean the session has ended.
-const SESSION_ENDED_MESSAGES = [
-  'Invalid token',
-  'Token expired',
-  'Password recently changed!',
-  'User no longer exists',
-];
-
+// In the browser, an ended session logs the user out. On the server there's no token here (it's
+// passed per request by serverApi.ts), so this does nothing and serverApi.ts handles it instead.
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message;
-    if (getToken() && SESSION_ENDED_MESSAGES.includes(message)) {
+    if (getToken() && isSessionEnded(error)) {
       clearAuth();
       const redirect = encodeURIComponent(window.location.pathname + window.location.search);
       window.location.assign(`${Routes.LOGIN}?redirect=${redirect}`);

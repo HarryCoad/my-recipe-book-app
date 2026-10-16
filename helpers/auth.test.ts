@@ -1,4 +1,4 @@
-import { isAuthPage, isTokenExpired, safeRedirect } from '@/helpers/auth';
+import { getUserIdFromToken, isAuthPage, isTokenExpired, safeRedirect } from '@/helpers/auth';
 
 const makeToken = (payload: object) =>
   `header.${btoa(JSON.stringify(payload)).replace(/=+$/, '')}.signature`;
@@ -19,6 +19,7 @@ describe('auth helpers', () => {
     expect(safeRedirect('//evil.com')).toBe('/');
     expect(safeRedirect('/\\evil.com')).toBe('/');
     expect(safeRedirect('/login')).toBe('/');
+    expect(safeRedirect('/logout')).toBe('/');
   });
 
   it('reads the expiry from a JWT', () => {
@@ -27,5 +28,13 @@ describe('auth helpers', () => {
     expect(isTokenExpired(makeToken({ id: '1', exp: inAnHour }))).toBe(false);
     expect(isTokenExpired(makeToken({ id: '1', exp: anHourAgo }))).toBe(true);
     expect(isTokenExpired('not-a-jwt')).toBe(true);
+  });
+});
+
+describe('getUserIdFromToken', () => {
+  it('reads the id the API signs into the token', () => {
+    expect(getUserIdFromToken(makeToken({ id: 'user-1' }))).toBe('user-1');
+    expect(getUserIdFromToken(makeToken({ sub: 'user-1' }))).toBeNull();
+    expect(getUserIdFromToken('not-a-jwt')).toBeNull();
   });
 });

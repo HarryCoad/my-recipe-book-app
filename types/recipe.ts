@@ -1,3 +1,5 @@
+import { APIResponse } from '@/helpers/axios';
+
 export interface Recipe {
   id: string;
   // Both are null when the author deleted the recipe but others still have it saved
@@ -19,6 +21,13 @@ export interface Recipe {
   savedCount: number;
   bDeleted: boolean;
 }
+
+// GET /recipes/search: `data` is the list itself, not `data.recipes`
+export type RecipeSearchResponse = APIResponse<Recipe[]> & {
+  results: number;
+  totalPages: number;
+  currentPage: number;
+};
 
 export interface Ingredient {
   id: string;

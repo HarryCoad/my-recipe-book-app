@@ -7,6 +7,11 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get(TOKEN_COOKIE)?.value;
   const loggedIn = !!token && !isTokenExpired(token);
 
+  // Always reachable, so an ended session can be cleared
+  if (pathname === Routes.LOGOUT) {
+    return NextResponse.next();
+  }
+
   if (isAuthPage(pathname)) {
     // Logged-in users have no reason to see login or sign-up
     return loggedIn

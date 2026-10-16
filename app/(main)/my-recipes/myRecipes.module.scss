@@ -1,0 +1,16 @@
+.list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  list-style-type: none;
+  max-width: 50rem;
+  padding-left: 0;
+  justify-self: center;
+
+  li {
+    width: 100%;
+  }
+}

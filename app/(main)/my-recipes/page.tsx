@@ -1,90 +1,50 @@
-'use client';
-
-import Link from 'next/link';
-import styles from './recipe.module.scss';
-import {
-  IconChevronRight,
-  IconPizza,
-  IconSlice,
-  IconSoup,
-  IconToolsKitchen3,
-} from '@tabler/icons-react';
-import { Button, Container, Flex, Text, Title } from '@mantine/core';
-import recipes from '@/devData/recipes.json';
+import { redirect } from 'next/navigation';
+import styles from './myRecipes.module.scss';
+import { Text, Title } from '@mantine/core';
+import { RecipeCard } from '@/components/RecipeCard/RecipeCard';
+import { RecipePagination } from '@/components/RecipePagination/RecipePagination';
 import { Routes } from '@/helpers/constants';
-import { Recipe } from './models';
+import { endpoints } from '@/helpers/endpoints';
+import { getSession, serverGet } from '@/helpers/serverApi';
+import { RecipeSearchResponse } from '@/types/recipe';
 
-export default function MyRecipes() {
+type PageProps = {
+  searchParams: Promise<{ page?: string }>;
+};
+
+export default async function MyRecipes({ searchParams }: PageProps) {
+  const page = Math.max(1, parseInt((await searchParams).page ?? '', 10) || 1);
+  const { userId } = await getSession();
+
+  const { data: recipes, totalPages } = await serverGet<RecipeSearchResponse>(
+    endpoints.recipes.search,
+    { params: { authorId: userId, page } }
+  );
+
+  // Past the last page, e.g. after deleting recipes or editing the URL
+  if (recipes.length === 0 && page > 1) {
+    redirect(totalPages > 1 ? `${Routes.MY_RECIPES}?page=${totalPages}` : Routes.MY_RECIPES);
+  }
+
   return (
     <>
-      <Title className="" ta="center">
-        My Recipes
-      </Title>
-      <ul className={styles.list}>
-        {/* Map through the recipes and display them in a list */}
-        {(recipes as Recipe[]).map((recipe) => (
-          <li key={recipe.id} className={styles.listItem}>
-            {/* Recipes don't have images yet, so show a placeholder */}
-            <Flex justify="center" align="center">
-              <div className={styles.emptyImage}>
-                <IconPizza stroke={1.5} size={50} />
-              </div>
-            </Flex>
+      <Title ta="center">My Recipes</Title>
 
-            <div className={styles.content}>
-              <Flex justify="space-between" gap={10} align="center" mt={10}>
-                <Text size="xl">{recipe.title}</Text>
-                <span title="Category" className={`${styles.iconInfo} ${styles.category}`}>
-                  {recipe.category}
-                </span>
-              </Flex>
+      {recipes.length === 0 ? (
+        <Text ta="center" c="dimmed" mt="xl">
+          You haven't created any recipes yet.
+        </Text>
+      ) : (
+        <ul className={styles.list}>
+          {recipes.map((recipe) => (
+            <li key={recipe.id}>
+              <RecipeCard recipe={recipe} href={`${Routes.MY_RECIPES}/${recipe.id}`} />
+            </li>
+          ))}
+        </ul>
+      )}
 
-              <Container mt={10} w="100%" p={0}>
-                <div className={styles.floatRight}>
-                  <Flex gap={5} align="center">
-                    {recipe.prepTime > 0 && (
-                      <span className={styles.iconInfo} title="Prep Time">
-                        <IconSlice stroke={1.5} size={15} /> {recipe.prepTime}
-                      </span>
-                    )}
-                    {recipe.cookTime > 0 && (
-                      <span className={styles.iconInfo} title="Cook Time">
-                        <IconSoup stroke={1.5} size={15} /> {recipe.cookTime}
-                      </span>
-                    )}
-                    <span className={styles.iconInfo} title="Serves">
-                      <IconToolsKitchen3 stroke={1.5} size={15} /> {recipe.serves}
-                    </span>
-                  </Flex>
-                </div>
-                <Text size="sm" color="dimmed" mt={10}>
-                  {recipe.description.slice(0, 270)}
-                  {recipe.description.length > 270 ? '... ' : ' '}
-                </Text>
-                <div className={styles.clearfix} />
-              </Container>
-
-              <Flex align="flex-end" justify="space-between" style={{ marginTop: 'auto' }}>
-                <Flex gap={10} align="center" wrap="wrap">
-                  {recipe.tags.map((tag, i) => (
-                    <span className={styles.tag} key={i}>
-                      {tag}
-                    </span>
-                  ))}
-                </Flex>
-                <Link href={`${Routes.MY_RECIPES}/${recipe.id}`} className={styles.link}>
-                  <Button mt={10} variant="outline" color="orange" size="m">
-                    <Flex gap={5} align="center">
-                      View Recipe
-                      <IconChevronRight stroke={2} size={15} />
-                    </Flex>
-                  </Button>
-                </Link>
-              </Flex>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <RecipePagination page={page} totalPages={totalPages} />
     </>
   );
 }

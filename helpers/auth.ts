@@ -45,16 +45,26 @@ export const clearAuth = () => {
   window.localStorage.removeItem(USER_KEY);
 };
 
-// Decodes the JWT's expiry without verifying it. Only the API can verify the token, so this is
-// just for redirecting early when it has obviously expired.
-export const isTokenExpired = (token: string) => {
+// Reads the JWT's payload without verifying it. Only the API can verify the token, so use this
+// for routing and for building requests, never to decide what someone is allowed to see.
+const decodeToken = (token: string): { id?: unknown; exp?: unknown } | null => {
   try {
     const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    const { exp } = JSON.parse(atob(payload));
-    return typeof exp === 'number' && exp * 1000 < Date.now();
+    return JSON.parse(atob(payload));
   } catch {
-    return true;
+    return null;
   }
+};
+
+export const isTokenExpired = (token: string) => {
+  const payload = decodeToken(token);
+  return !payload || (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now());
+};
+
+// The API signs tokens with { id: <user id> }
+export const getUserIdFromToken = (token: string) => {
+  const id = decodeToken(token)?.id;
+  return typeof id === 'string' ? id : null;
 };
 
 // The only pages you can see while logged out
@@ -71,4 +81,10 @@ export const isAuthPage = (pathname: string) =>
 // Only follow redirects within this site, so ?redirect= can't send users elsewhere.
 // Browsers treat "/\" like "//", so backslashes are rejected too.
 export const safeRedirect = (path: string | null) =>
-  path && path.startsWith('/') && !/^\/[/\\]/.test(path) && !isAuthPage(path) ? path : Routes.HOME;
+  path &&
+  path.startsWith('/') &&
+  !/^\/[/\\]/.test(path) &&
+  !isAuthPage(path) &&
+  path !== Routes.LOGOUT
+    ? path
+    : Routes.HOME;
