@@ -1,3 +1,5 @@
+// Type-only, because axios.ts imports this file
+import type { APIResponse } from '@/helpers/axios';
 import { Routes } from '@/helpers/constants';
 
 export type AuthUser = {
@@ -6,6 +8,9 @@ export type AuthUser = {
   email: string;
   photo: string;
 };
+
+// Returned by login, signup and reset password
+export type AuthResponse = APIResponse<{ user: AuthUser }> & { token: string };
 
 // The token is kept in a cookie so middleware.ts can check it before rendering a page. This is
 // our own cookie on the UI's domain: the API ignores cookies and only reads the header.

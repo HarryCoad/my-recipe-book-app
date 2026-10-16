@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import styles from './styles.module.scss';
+import styles from '../auth.module.scss';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { withZodSchema } from 'formik-validator-zod';
 import { z } from 'zod';
 import { Alert, Button, Divider, PasswordInput, TextInput } from '@mantine/core';
-import { AuthUser, safeRedirect, setAuth } from '@/helpers/auth';
-import axios, { APIResponse, isSuccess } from '@/helpers/axios';
+import { AuthResponse, safeRedirect, setAuth } from '@/helpers/auth';
+import axios, { isSuccess } from '@/helpers/axios';
 import { Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
 import { getErrorMessage, getMessageForCode } from '@/helpers/errors';
@@ -23,10 +23,6 @@ type FormState = {
   email: string;
   password: string;
 };
-type LoginData = {
-  user: AuthUser;
-};
-type LoginResponse = APIResponse<LoginData> & { token: string };
 
 const Login = () => {
   const router = useRouter();
@@ -34,7 +30,7 @@ const Login = () => {
   const handleSubmit = async (values: FormState, { setStatus }: FormikHelpers<FormState>) => {
     setStatus(undefined);
     try {
-      const res = await axios.post<LoginResponse>(endpoints.auth.login, values);
+      const res = await axios.post<AuthResponse>(endpoints.auth.login, values);
 
       if (isSuccess(res)) {
         setAuth(res.data.token, res.data.data.user);
