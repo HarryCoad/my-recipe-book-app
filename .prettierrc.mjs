@@ -3,6 +3,8 @@ const config = {
   printWidth: 100,
   singleQuote: true,
   trailingComma: 'es5',
+  // Git on Windows checks files out with CRLF line endings, so accept either
+  endOfLine: 'auto',
   plugins: ['@ianvs/prettier-plugin-sort-imports'],
   importOrder: [
     '.*styles.css$',
