@@ -10,8 +10,8 @@ import {
   IconToolsKitchen3,
 } from '@tabler/icons-react';
 import { Button, Container, Flex, Text, Title } from '@mantine/core';
+import recipes from '@/devData/recipes.json';
 import { Routes } from '@/helpers/constants';
-import recipes from '../../devData/recipes.json';
 import { Recipe } from './models';
 
 export default function MyRecipes() {
@@ -24,16 +24,11 @@ export default function MyRecipes() {
         {/* Map through the recipes and display them in a list */}
         {(recipes as Recipe[]).map((recipe) => (
           <li key={recipe.id} className={styles.listItem}>
-            {/* Display the recipe image */}
+            {/* Recipes don't have images yet, so show a placeholder */}
             <Flex justify="center" align="center">
-              {recipe.image && (
-                <img className={styles.image} src={recipe.image} alt={recipe.title} />
-              )}
-              {!recipe.image && (
-                <div className={styles.emptyImage}>
-                  <IconPizza stroke={1.5} size={50} />
-                </div>
-              )}
+              <div className={styles.emptyImage}>
+                <IconPizza stroke={1.5} size={50} />
+              </div>
             </Flex>
 
             <div className={styles.content}>

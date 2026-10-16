@@ -1,22 +1,22 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './styles.module.scss';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { withZodSchema } from 'formik-validator-zod';
 import { z } from 'zod';
-import { Button, Divider, PasswordInput, TextInput } from '@mantine/core';
+import { Alert, Button, Divider, PasswordInput, TextInput } from '@mantine/core';
+import { AuthUser, safeRedirect, setAuth } from '@/helpers/auth';
 import axios, { APIResponse, isSuccess } from '@/helpers/axios';
+import { Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
+import { getErrorMessage, getMessageForCode } from '@/helpers/errors';
 
 const validationSchema = z.object({
-  email: z
-    .string()
-    .min(2, 'Name must be at least 2 characters long')
-    .max(25, 'Name should be at most 25 characters long'),
-  password: z
-    .string()
-    .min(8, 'Password should be at least 8 characters long')
-    .max(16, 'Password should be at most 16 characters long'),
+  email: z.string().min(1, 'Please enter your email').email('Please enter a valid email'),
+  password: z.string().min(1, 'Please enter your password'),
 });
 
 type FormState = {
@@ -24,29 +24,28 @@ type FormState = {
   password: string;
 };
 type LoginData = {
-  user: {
-    username: string;
-    email: string;
-    photo: string;
-  };
+  user: AuthUser;
 };
 type LoginResponse = APIResponse<LoginData> & { token: string };
 
 const Login = () => {
-  const handleSubmit = async (values: FormState, helpers: FormikHelpers<FormState>) => {
+  const router = useRouter();
+
+  const handleSubmit = async (values: FormState, { setStatus }: FormikHelpers<FormState>) => {
+    setStatus(undefined);
     try {
-      // Submit form
       const res = await axios.post<LoginResponse>(endpoints.auth.login, values);
 
       if (isSuccess(res)) {
-        console.log(res.data.token);
+        setAuth(res.data.token, res.data.data.user);
+        // Back to the page middleware.ts sent them here from, if any
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+        router.replace(safeRedirect(redirect));
+      } else {
+        setStatus(getMessageForCode(res.data.message));
       }
-      // Save token to cookie
-
-      // Route to dashboard
     } catch (err) {
-      // handle submission error for validation
-      // handle general error
+      setStatus(getErrorMessage(err));
     }
   };
 
@@ -60,7 +59,7 @@ const Login = () => {
           validate={withZodSchema(validationSchema)}
           onSubmit={handleSubmit}
         >
-          {({ errors, getFieldProps, touched }) => {
+          {({ errors, getFieldProps, isSubmitting, status, touched }) => {
             return (
               <Form>
                 <TextInput
@@ -78,7 +77,12 @@ const Login = () => {
                   error={touched.password && errors.password}
                   {...getFieldProps('password')}
                 />
-                <Button mt={10} fullWidth type="submit">
+                {status && (
+                  <Alert mt={10} color="red" icon={<IconAlertCircle />}>
+                    {status}
+                  </Alert>
+                )}
+                <Button mt={10} fullWidth type="submit" loading={isSubmitting}>
                   Login
                 </Button>
               </Form>
@@ -86,7 +90,7 @@ const Login = () => {
           }}
         </Formik>
         <p>
-          Don't have an account? <span>Sign up!</span>
+          Don't have an account? <Link href={Routes.SIGN_UP}>Sign up!</Link>
         </p>
       </div>
     </div>

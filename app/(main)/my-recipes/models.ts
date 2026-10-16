@@ -1,12 +1,13 @@
 export interface Recipe {
   id: string;
-  authorId: string;
-  authorType: 'User' | string;
+  // Both are null when the author deleted the recipe but others still have it saved
+  authorId: string | null;
+  authorName: string | null;
+  authorType?: string;
   bPrivate: boolean;
   bAllowSuggestions: boolean;
   title: string;
   description: string;
-  image: string | null;
   category: string;
   serves: number;
   prepTime: number;
@@ -14,8 +15,9 @@ export interface Recipe {
   ingredients: Ingredient[];
   steps: string[];
   tags: string[];
-  savedBy: string[];
-  bDeleted?: boolean;
+  bSaved: boolean;
+  savedCount: number;
+  bDeleted: boolean;
 }
 
 export interface Ingredient {

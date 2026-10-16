@@ -7,7 +7,6 @@
     "bAllowSuggestions": false,
     "title": "Spicy Chickpea Curry",
     "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Recusandae ea minus quisquam magni blanditiis mollitia, reiciendis nesciunt et ut veritatis reprehenderit repudiandae animi tenetur dolorem! Iusto placeat facere aut quam neque error voluptatibus enim veniam fuga accusamus rerum, expedita modi voluptates ducimus est. Earum minus velit incidunt. Consequuntur maxime mollitia voluptas quos eum, fugit voluptatibus doloremque dolor dolore nemo dolores nam sequi odio magnam cumque! Vero, blanditiis voluptatibus accusamus eveniet iure molestiae, consequuntur beatae veniam autem quisquam earum aperiam cupiditate provident suscipit, repellat sint facere enim unde exercitationem animi voluptates. Id expedita et tenetur ut quisquam recusandae sed qui accusantium?",
-    "image": "https://abh.ai/cats/400",
     "category": "Main",
     "serves": 4,
     "prepTime": 10,
@@ -71,13 +70,16 @@
       }
     ],
     "steps": [
-      "Saut\u00e9 onions, garlic, and ginger in a pan.",
+      "Sauté onions, garlic, and ginger in a pan.",
       "Add tomato puree and spices, cook for 5 minutes.",
       "Stir in chickpeas and coconut milk, simmer for 20 minutes.",
       "Serve with rice or naan."
     ],
     "tags": ["Vegan", "Indian", "Spicy", "Gluten-Free"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1ce0",
@@ -87,7 +89,6 @@
     "bAllowSuggestions": false,
     "title": "Mediterranean Hummus Wrap",
     "description": "A healthy wrap filled with hummus and fresh vegetables.",
-    "image": "https://abh.ai/cats/400",
     "category": "Lunch",
     "serves": 2,
     "prepTime": 10,
@@ -142,7 +143,10 @@
       "Roll the wrap tightly and slice in half."
     ],
     "tags": ["Vegan", "Mediterranean", "Healthy", "Quick"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1ce7",
@@ -152,7 +156,6 @@
     "bAllowSuggestions": false,
     "title": "Miso Soup with Tofu",
     "description": "A simple and comforting miso soup with tofu and seaweed.",
-    "image": "https://abh.ai/cats/400",
     "category": "Main",
     "serves": 2,
     "prepTime": 5,
@@ -200,7 +203,10 @@
       "Simmer for 5 minutes and serve with green onions."
     ],
     "tags": ["Vegan", "Japanese", "Light", "Gluten-Free"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1ced",
@@ -210,7 +216,6 @@
     "bAllowSuggestions": false,
     "title": "Vegan Mushroom Stroganoff",
     "description": "A creamy mushroom stroganoff made with coconut cream and served over pasta.",
-    "image": null,
     "category": "Main",
     "serves": 2,
     "prepTime": 15,
@@ -260,12 +265,15 @@
       }
     ],
     "steps": [
-      "Saut\u00e9 onions, garlic, and mushrooms until soft.",
+      "Sauté onions, garlic, and mushrooms until soft.",
       "Add vegetable broth and simmer for 10 minutes.",
       "Stir in coconut cream and serve over cooked pasta."
     ],
     "tags": ["Vegan", "Russian", "Comfort Food"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1d02",
@@ -275,7 +283,6 @@
     "bAllowSuggestions": false,
     "title": "Vegan Sushi Rolls",
     "description": "Homemade sushi rolls filled with fresh vegetables.",
-    "image": null,
     "category": "Sharer",
     "serves": 2,
     "prepTime": 20,
@@ -324,7 +331,10 @@
       "Cut into bite-sized pieces and serve."
     ],
     "tags": ["Vegan", "Japanese", "Gluten-Free"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1d08",
@@ -334,7 +344,6 @@
     "bAllowSuggestions": false,
     "title": "Vegan Ratatouille",
     "description": "A classic French dish made with layered vegetables.",
-    "image": "https://abh.ai/cats/400",
     "category": "Main",
     "serves": 4,
     "prepTime": 15,
@@ -379,10 +388,13 @@
     "steps": [
       "Slice all vegetables.",
       "Layer them in a baking dish and drizzle with olive oil.",
-      "Bake for 40 minutes at 180\u00b0C (350\u00b0F)."
+      "Bake for 40 minutes at 180°C (350°F)."
     ],
     "tags": ["Vegan", "French", "Healthy"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1cce",
@@ -392,7 +404,6 @@
     "bAllowSuggestions": false,
     "title": "Vegan Pad Thai",
     "description": "A quick and easy vegan pad thai with tofu and vegetables.",
-    "image": "https://abh.ai/cats/400",
     "category": "Main",
     "serves": 2,
     "prepTime": 15,
@@ -457,21 +468,16 @@
     ],
     "steps": [
       "Cook rice noodles according to package instructions.",
-      "Saut\u00e9 tofu in a pan until golden brown.",
+      "Sauté tofu in a pan until golden brown.",
       "Mix peanut butter, soy sauce, lime juice, and garlic into a sauce.",
       "Toss noodles, tofu, and sauce together.",
       "Top with bean sprouts and crushed peanuts."
     ],
     "tags": ["Vegan", "Asian", "Thai", "Gluten-Free"],
-    "savedBy": [
-      {
-        "$oid": "67aa79c55d34d340eed9c77d"
-      },
-      {
-        "$oid": "67a272327c42615e739e15f5"
-      }
-    ],
-    "bDeleted": false
+    "bDeleted": false,
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 2
   },
   {
     "id": "67a6a8041b2c22d8c2eb1cf4",
@@ -481,7 +487,6 @@
     "bAllowSuggestions": false,
     "title": "Vegan Tacos",
     "description": "Delicious tacos filled with black beans and avocado.",
-    "image": null,
     "category": "Sharer",
     "serves": 3,
     "prepTime": 15,
@@ -537,7 +542,10 @@
       "Serve immediately."
     ],
     "tags": ["Vegan", "Mexican", "Gluten-Free"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1d0e",
@@ -546,7 +554,6 @@
     "bPrivate": false,
     "bAllowSuggestions": false,
     "title": "Vegan Falafel",
-    "image": "https://abh.ai/cats/400",
     "description": "Crispy falafel made with chickpeas and spices.",
     "category": "Lunch",
     "serves": 4,
@@ -588,7 +595,10 @@
       "Serve with hummus or tahini sauce."
     ],
     "tags": ["Vegan", "Middle Eastern", "Gluten-Free"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   },
   {
     "id": "67a6a8041b2c22d8c2eb1cfb",
@@ -598,7 +608,6 @@
     "bAllowSuggestions": false,
     "title": "Vegan Lentil Soup",
     "description": "A hearty lentil soup with vegetables and spices.",
-    "image": null,
     "category": "Starter",
     "serves": 4,
     "prepTime": 10,
@@ -648,12 +657,15 @@
       }
     ],
     "steps": [
-      "Saut\u00e9 carrot and celery.",
+      "Sauté carrot and celery.",
       "Add tomato paste, cumin, and lentils.",
       "Pour in vegetable broth and simmer for 25 minutes.",
       "Blend for a smooth texture if desired."
     ],
     "tags": ["Vegan", "Middle Eastern", "Soup"],
-    "savedBy": []
+    "authorName": "demo-user",
+    "bSaved": true,
+    "savedCount": 1,
+    "bDeleted": false
   }
 ]

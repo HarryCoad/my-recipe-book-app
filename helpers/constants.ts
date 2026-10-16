@@ -1,6 +1,6 @@
 export enum Routes {
   // Auth
-  REGISTER = '/register',
+  SIGN_UP = '/sign-up',
   LOGIN = '/login',
   FORGOTTEN_PASSWORD = '/forgotten-password',
   RESET_PASSWORD = '/reset-password',
