@@ -72,7 +72,20 @@ describe('My recipes page', () => {
     get.mockResolvedValue(searchResponse([], 0));
     await renderPage();
 
-    expect(screen.getByText("You haven't created any recipes yet.")).toBeVisible();
+    expect(screen.getByText(/You haven't created any recipes yet/)).toBeVisible();
+  });
+
+  it.each([
+    ['with recipes', [first]],
+    ['without recipes', []],
+  ])('always offers a new recipe button (%s)', async (_, data) => {
+    get.mockResolvedValue(searchResponse(data));
+    await renderPage();
+
+    expect(screen.getByRole('link', { name: 'New recipe' })).toHaveAttribute(
+      'href',
+      '/my-recipes/new'
+    );
   });
 
   it('goes to the last page when the requested one is past the end', async () => {

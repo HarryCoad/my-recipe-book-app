@@ -1,16 +1,27 @@
+.page {
+  max-width: 50rem;
+  margin: 0 auto;
+}
+
+// Title centred, "New recipe" lined up with the right edge of the list
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+
+  .title {
+    grid-column: 2;
+  }
+  .actions {
+    justify-self: end;
+  }
+}
+
 .list {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 1rem;
   list-style-type: none;
-  max-width: 50rem;
   padding-left: 0;
-  justify-self: center;
-
-  li {
-    width: 100%;
-  }
 }

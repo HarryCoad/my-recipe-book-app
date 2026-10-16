@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import styles from './myRecipes.module.scss';
-import { Text, Title } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
+import { Button, Text, Title } from '@mantine/core';
 import { RecipeCard } from '@/components/RecipeCard/RecipeCard';
 import { RecipePagination } from '@/components/RecipePagination/RecipePagination';
 import { Routes } from '@/helpers/constants';
@@ -27,12 +29,24 @@ export default async function MyRecipes({ searchParams }: PageProps) {
   }
 
   return (
-    <>
-      <Title ta="center">My Recipes</Title>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <Title className={styles.title}>My Recipes</Title>
+        <div className={styles.actions}>
+          <Button
+            component={Link}
+            href={Routes.NEW_RECIPE}
+            color="orange"
+            leftSection={<IconPlus size={18} />}
+          >
+            Create recipe
+          </Button>
+        </div>
+      </div>
 
       {recipes.length === 0 ? (
         <Text ta="center" c="dimmed" mt="xl">
-          You haven't created any recipes yet.
+          You haven't created any recipes yet. Use "Create recipe" to add your first one.
         </Text>
       ) : (
         <ul className={styles.list}>
@@ -45,6 +59,6 @@ export default async function MyRecipes({ searchParams }: PageProps) {
       )}
 
       <RecipePagination page={page} totalPages={totalPages} />
-    </>
+    </div>
   );
 }
