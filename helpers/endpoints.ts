@@ -5,5 +5,7 @@ export const endpoints = {
   },
   recipes: {
     search: '/api/v1/recipes/search',
+    create: '/api/v1/recipes/create',
+    tags: '/api/v1/recipes/tags',
   },
 };

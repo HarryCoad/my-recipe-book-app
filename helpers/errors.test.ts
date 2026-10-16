@@ -1,5 +1,5 @@
 import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
-import { getErrorCode, getErrorMessage, getMessageForCode } from '@/helpers/errors';
+import { getErrorCode, getErrorMessage, getFieldErrors, getMessageForCode } from '@/helpers/errors';
 
 const apiError = (status: number, data: unknown) =>
   new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
@@ -32,5 +32,31 @@ describe('error helpers', () => {
 
   it('returns no code for errors that did not come from the API', () => {
     expect(getErrorCode(new Error('boom'))).toBeNull();
+  });
+});
+
+describe('getFieldErrors', () => {
+  it("maps a Validation_Error's fields to form paths and friendly text", () => {
+    const err = apiError(400, {
+      status: 0,
+      message: 'Validation_Error',
+      errors: [
+        { fieldname: 'ingredients.[0].unit', code: 'invalid_enum_value' },
+        { fieldname: 'steps.[2]', code: 'too_small' },
+        { fieldname: 'title', code: 'something_new' },
+      ],
+    });
+    expect(getFieldErrors(err)).toEqual({
+      'ingredients[0].unit': 'Please choose one of the options.',
+      'steps[2]': 'This is missing or too small.',
+      title: 'Some of the details entered are invalid.',
+    });
+  });
+
+  it('returns nothing for other errors', () => {
+    expect(getFieldErrors(apiError(401, { status: 0, message: 'INVALID_CREDENTIALS' }))).toEqual(
+      {}
+    );
+    expect(getFieldErrors(new Error('boom'))).toEqual({});
   });
 });

@@ -78,11 +78,11 @@ describe('My recipes page', () => {
   it.each([
     ['with recipes', [first]],
     ['without recipes', []],
-  ])('always offers a new recipe button (%s)', async (_, data) => {
+  ])('always offers a create recipe button (%s)', async (_, data) => {
     get.mockResolvedValue(searchResponse(data));
     await renderPage();
 
-    expect(screen.getByRole('link', { name: 'New recipe' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Create recipe' })).toHaveAttribute(
       'href',
       '/my-recipes/new'
     );

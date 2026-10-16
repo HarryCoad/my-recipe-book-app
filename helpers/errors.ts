@@ -66,3 +66,26 @@ export const isSessionEnded = (err: unknown) => {
   const code = getErrorCode(err);
   return !!code && SESSION_ENDED_MESSAGES.includes(code);
 };
+
+// Friendly text for the codes in a Validation_Error's `errors` list (these are Zod issue codes)
+const fieldErrorMessages: Record<string, string> = {
+  too_small: 'This is missing or too small.',
+  too_big: 'This is too long or too large.',
+  invalid_type: 'Please enter a valid value.',
+  invalid_enum_value: 'Please choose one of the options.',
+};
+
+// A Validation_Error's field errors, keyed by form path. The API writes array indexes as
+// `ingredients.[0].unit`, which becomes `ingredients[0].unit` for Formik's setFieldError.
+export const getFieldErrors = (err: unknown): Record<string, string> => {
+  const apiError = getAPIError(err);
+  if (apiError?.message !== 'Validation_Error') {
+    return {};
+  }
+  return Object.fromEntries(
+    (apiError.errors ?? []).map(({ fieldname, code }) => [
+      fieldname.replace(/\.\[(\d+)\]/g, '[$1]'),
+      fieldErrorMessages[code] ?? errorMessages.INVALID,
+    ])
+  );
+};

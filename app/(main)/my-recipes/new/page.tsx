@@ -1,20 +1,20 @@
 import styles from '../[id]/myRecipe.module.scss';
-import { Text, Title } from '@mantine/core';
+import { Container, Title } from '@mantine/core';
 import BackButton from '@/components/BackButton/BackButton';
+import { CreateRecipeForm } from './CreateRecipeForm';
 
-// Placeholder until the create form is built (POST /recipes/create). This static route takes priority
-// over [id], so /my-recipes/new isn't treated as a recipe id.
+// This static route takes priority over [id], so /my-recipes/new isn't treated as a recipe id
 const NewRecipe = () => {
   return (
-    <>
+    <Container size="md" px={0}>
       <div className={styles.Header}>
         <BackButton />
-        <Title ta="center">New Recipe</Title>
+        <Title ta="center">Create Recipe</Title>
       </div>
-      <Text ta="center" c="dimmed" mt="xl">
-        Creating recipes is coming soon.
-      </Text>
-    </>
+      <Container size="sm" px={0} mt="lg" mb="xl">
+        <CreateRecipeForm />
+      </Container>
+    </Container>
   );
 };
 
