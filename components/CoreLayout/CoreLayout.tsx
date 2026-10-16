@@ -17,13 +17,13 @@ export default function CoreLayout({ children }: { children: any }) {
         navbar={{
           width: 300,
           breakpoint: 'sm',
-          collapsed: { mobile: !opened },
+          collapsed: { mobile: !opened, desktop: !opened },
         }}
         padding="md"
       >
         <AppShell.Header>
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" pl="md" />
-          <Group align="center" pl="md">
+          <Group align="center" pl="md" style={{ height: '100%' }}>
+            <Burger opened={opened} onClick={toggle} size="md" />
             <Logo style={{ width: 120 }} />
             <Code fw={700}>v3.1.2</Code>
           </Group>

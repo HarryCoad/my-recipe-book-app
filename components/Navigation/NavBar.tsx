@@ -7,7 +7,7 @@ export function NavBar() {
   const links = NAV_DATA.map((item) => <NavLinkGroup {...item} key={item.label} />);
 
   return (
-    <nav className={classes.navbar}>
+    <nav className={classes.navbar} style={{ height: '100%' }}>
       <ScrollArea className={classes.links}>
         <div className={classes.linksInner}>{links}</div>
       </ScrollArea>

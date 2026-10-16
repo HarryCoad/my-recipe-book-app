@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import styles from './recipe.module.scss';
 import {
   IconChevronRight,
@@ -9,13 +10,14 @@ import {
   IconToolsKitchen3,
 } from '@tabler/icons-react';
 import { Button, Container, Flex, Text, Title } from '@mantine/core';
+import { Routes } from '@/helpers/constants';
 import recipes from '../../devData/recipes.json';
 import { Recipe } from './models';
 
 export default function MyRecipes() {
   return (
     <>
-      <Title className="" ta="center" mt={20}>
+      <Title className="" ta="center">
         My Recipes
       </Title>
       <ul className={styles.list}>
@@ -63,8 +65,8 @@ export default function MyRecipes() {
                 <Text size="sm" color="dimmed" mt={10}>
                   {recipe.description.slice(0, 270)}
                   {recipe.description.length > 270 ? '... ' : ' '}
-                  <div className={styles.clearfix} />
                 </Text>
+                <div className={styles.clearfix} />
               </Container>
 
               <Flex align="flex-end" justify="space-between" style={{ marginTop: 'auto' }}>
@@ -75,12 +77,14 @@ export default function MyRecipes() {
                     </span>
                   ))}
                 </Flex>
-                <Button mt={10} variant="outline" color="orange" size="m">
-                  <Flex gap={5} align="center">
-                    View Recipe
-                    <IconChevronRight stroke={2} size={15} />
-                  </Flex>
-                </Button>
+                <Link href={`${Routes.MY_RECIPES}/${recipe.id}`} className={styles.link}>
+                  <Button mt={10} variant="outline" color="orange" size="m">
+                    <Flex gap={5} align="center">
+                      View Recipe
+                      <IconChevronRight stroke={2} size={15} />
+                    </Flex>
+                  </Button>
+                </Link>
               </Flex>
             </div>
           </li>
