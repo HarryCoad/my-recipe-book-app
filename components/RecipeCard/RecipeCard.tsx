@@ -2,9 +2,9 @@ import Link from 'next/link';
 import styles from './RecipeCard.module.scss';
 import {
   IconChevronRight,
+  IconFlame,
   IconPizza,
   IconSlice,
-  IconSoup,
   IconToolsKitchen3,
 } from '@tabler/icons-react';
 import { Button, Container, Flex, Text } from '@mantine/core';
@@ -47,7 +47,7 @@ export function RecipeCard({ recipe, href }: RecipeCardProps) {
               )}
               {recipe.cookTime > 0 && (
                 <span className={styles.iconInfo} title="Cook Time">
-                  <IconSoup stroke={1.5} size={15} /> {recipe.cookTime}
+                  <IconFlame stroke={1.5} size={15} /> {recipe.cookTime}
                 </span>
               )}
               <span className={styles.iconInfo} title="Serves">

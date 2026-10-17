@@ -7,5 +7,6 @@ export const endpoints = {
     search: '/api/v1/recipes/search',
     create: '/api/v1/recipes/create',
     tags: '/api/v1/recipes/tags',
+    view: (id: string) => `/api/v1/recipes/${encodeURIComponent(id)}`,
   },
 };

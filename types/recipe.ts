@@ -86,3 +86,7 @@ export type CreateRecipeResponse = APIResponse<{ recipe: Recipe }>;
 // GET /recipes/tags: existing tags for autocomplete, most used first
 export type TagSuggestion = { tag: string; count: number };
 export type TagSuggestionsResponse = APIResponse<{ tags: TagSuggestion[] }>;
+
+// GET /recipes/:id. bHasEdits is true when the user has a personal edit, which the recipe
+// already includes unless ?original=true was asked for
+export type RecipeResponse = APIResponse<{ recipe: Recipe; bHasEdits: boolean }>;
