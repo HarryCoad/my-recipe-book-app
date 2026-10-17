@@ -7,6 +7,7 @@ export const endpoints = {
     search: '/api/v1/recipes/search',
     create: '/api/v1/recipes/create',
     updateOwn: '/api/v1/recipes/update-own-recipe',
+    delete: '/api/v1/recipes/delete',
     tags: '/api/v1/recipes/tags',
     view: (id: string) => `/api/v1/recipes/${encodeURIComponent(id)}`,
   },

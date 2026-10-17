@@ -87,6 +87,9 @@ export type CreateRecipeResponse = APIResponse<{ recipe: Recipe }>;
 export type UpdateOwnRecipeBody = { id: string } & Partial<CreateRecipeBody>;
 export type UpdateOwnRecipeResponse = APIResponse<{ recipe: Recipe }>;
 
+// POST /recipes/delete: author only. Responds with `data: null`
+export type DeleteRecipeBody = { id: string };
+
 // GET /recipes/tags: existing tags for autocomplete, most used first
 export type TagSuggestion = { tag: string; count: number };
 export type TagSuggestionsResponse = APIResponse<{ tags: TagSuggestion[] }>;

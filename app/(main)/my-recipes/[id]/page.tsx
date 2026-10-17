@@ -14,10 +14,10 @@ import {
   IconUsers,
 } from '@tabler/icons-react';
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Badge,
-  Button,
   Container,
   Grid,
   GridCol,
@@ -26,11 +26,13 @@ import {
   Text,
   ThemeIcon,
   Title,
+  Tooltip,
 } from '@mantine/core';
 import BackButton from '@/components/BackButton/BackButton';
 import { Routes } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
 import { getSession } from '@/helpers/serverApi';
+import { DeleteRecipeButton } from './DeleteRecipeButton';
 import { getRecipe } from './getRecipe';
 import { IngredientsPanel } from './IngredientsPanel';
 
@@ -67,6 +69,30 @@ export default async function RecipePage(props: PageProps) {
       <div className={styles.Header}>
         <BackButton />
         <Title ta="center">{recipe.title}</Title>
+        {isAuthor && (
+          <Group justify="flex-end" gap="xs" wrap="nowrap">
+            <Tooltip label="Edit recipe">
+              {/* Editing takes the recipe's place in the history, and saving or cancelling puts
+                  it back, so the history never holds both */}
+              <ActionIcon
+                component={Link}
+                href={`${recipeHref}/edit`}
+                replace
+                variant="light"
+                color="orange"
+                size="lg"
+                aria-label="Edit recipe"
+              >
+                <IconPencil size={18} />
+              </ActionIcon>
+            </Tooltip>
+            <DeleteRecipeButton
+              id={recipe.id}
+              title={recipe.title}
+              savedCount={recipe.savedCount}
+            />
+          </Group>
+        )}
       </div>
 
       <Group justify="center" gap="xs" mt="sm">
@@ -98,23 +124,6 @@ export default async function RecipePage(props: PageProps) {
           </Badge>
         )}
       </Group>
-
-      {isAuthor && (
-        <Group justify="center" mt="md">
-          {/* Editing takes the recipe's place in the history, and saving or cancelling puts it
-              back, so the history never holds both */}
-          <Button
-            component={Link}
-            href={`${recipeHref}/edit`}
-            replace
-            variant="light"
-            color="orange"
-            leftSection={<IconPencil size={16} />}
-          >
-            Edit recipe
-          </Button>
-        </Group>
-      )}
 
       <Stack gap="sm" mt="lg" maw={700} mx="auto">
         {original && (
