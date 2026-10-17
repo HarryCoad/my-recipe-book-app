@@ -3,8 +3,8 @@ import axios from '@/helpers/axios';
 import { render, screen, userEvent, waitFor } from '@/test-utils';
 import { CreateRecipeForm } from './CreateRecipeForm';
 
-const push = jest.fn();
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+const replace = jest.fn();
+jest.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 jest.mock('@/helpers/axios', () => ({
   __esModule: true,
   ...jest.requireActual('@/helpers/axios'),
@@ -71,7 +71,7 @@ describe('Create recipe form', () => {
     await userEvent.click(screen.getByLabelText(/^Allow suggestions/));
     await submit();
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/my-recipes/r1'));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/my-recipes/r1'));
     // The empty rows Tab left behind (ingredient 3, and one after the syrup) are ignored
     expect(post).toHaveBeenCalledWith('/api/v1/recipes/create', {
       title: 'Pancakes',
@@ -194,6 +194,6 @@ describe('Create recipe form', () => {
     expect(await screen.findByText('Please choose one of the options.')).toBeVisible();
     expect(field('Ingredient 2 unit')).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByRole('alert')).toHaveTextContent('Some of the details entered are invalid.');
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   }, 30000);
 });

@@ -21,8 +21,9 @@ export function EditRecipeForm({ recipe }: { recipe: Recipe }) {
   const handleSubmit = async (body: CreateRecipeBody) => {
     const update: UpdateOwnRecipeBody = { id: recipe.id, ...body };
     await axios.patch<UpdateOwnRecipeResponse>(endpoints.recipes.updateOwn, update);
+    // Replaces the edit page in the history, so Back from the recipe doesn't return to the form.
     // The recipe page renders on the server, so it will show the changes
-    router.push(recipeHref);
+    router.replace(recipeHref);
   };
 
   return (

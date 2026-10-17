@@ -105,9 +105,12 @@ export default async function RecipePage(props: PageProps) {
 
       {isAuthor && (
         <Group justify="center" mt="md">
+          {/* Editing takes the recipe's place in the history, and saving or cancelling puts it
+              back, so the history never holds both */}
           <Button
             component={Link}
             href={`${recipeHref}/edit`}
+            replace
             variant="light"
             color="orange"
             leftSection={<IconPencil size={16} />}

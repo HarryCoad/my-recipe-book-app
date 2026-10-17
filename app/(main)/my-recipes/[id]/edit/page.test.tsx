@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { serverGet } from '@/helpers/serverApi';
-import { render, screen } from '@/test-utils';
+import { render, screen, userEvent } from '@/test-utils';
 import { Recipe } from '@/types/recipe';
 import EditRecipePage, { generateMetadata } from './page';
 
@@ -8,6 +8,8 @@ jest.mock('@/helpers/serverApi', () => ({
   getSession: async () => ({ token: 'jwt-token', userId: 'me' }),
   serverGet: jest.fn(),
 }));
+// Prefixed with mock so jest.mock can use it
+const mockReplace = jest.fn();
 jest.mock('next/navigation', () => ({
   notFound: jest.fn(() => {
     throw new Error('NOT_FOUND');
@@ -15,7 +17,7 @@ jest.mock('next/navigation', () => ({
   redirect: jest.fn(() => {
     throw new Error('REDIRECT');
   }),
-  useRouter: () => ({ back: jest.fn(), push: jest.fn() }),
+  useRouter: () => ({ back: jest.fn(), replace: mockReplace }),
 }));
 const get = serverGet as jest.Mock;
 
@@ -57,6 +59,14 @@ describe('Edit recipe page', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Edit Recipe' })).toBeVisible();
     expect(screen.getByLabelText(/^Title/)).toHaveValue('Spaghetti pomodoro');
     expect(get).toHaveBeenCalledWith('/api/v1/recipes/r1', { params: undefined });
+  });
+
+  it('goes back by replacing itself with the recipe, which it replaced in the history', async () => {
+    respond();
+    render(await EditRecipePage(props));
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(mockReplace).toHaveBeenCalledWith('/my-recipes/r1');
   });
 
   it.each([

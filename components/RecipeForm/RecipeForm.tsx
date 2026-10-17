@@ -90,7 +90,8 @@ export function RecipeForm({
             )}
 
             <Group justify="flex-end">
-              <Button component={Link} href={cancelHref} variant="default">
+              {/* Replaces the form in the history, so Back doesn't return to it */}
+              <Button component={Link} href={cancelHref} replace variant="default">
                 Cancel
               </Button>
               <Button type="submit" color="orange" loading={isSubmitting}>

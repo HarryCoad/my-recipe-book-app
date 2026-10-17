@@ -4,8 +4,8 @@ import { render, screen, userEvent, waitFor } from '@/test-utils';
 import { Recipe } from '@/types/recipe';
 import { EditRecipeForm } from './EditRecipeForm';
 
-const push = jest.fn();
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+const replace = jest.fn();
+jest.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 jest.mock('@/helpers/axios', () => ({
   __esModule: true,
   ...jest.requireActual('@/helpers/axios'),
@@ -69,7 +69,7 @@ describe('Edit recipe form', () => {
     await userEvent.type(screen.getByLabelText(/^Title/), 'Garlic spaghetti');
     await submit();
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/my-recipes/r1'));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/my-recipes/r1'));
     expect(patch).toHaveBeenCalledWith('/api/v1/recipes/update-own-recipe', {
       id: 'r1',
       title: 'Garlic spaghetti',
@@ -105,6 +105,6 @@ describe('Edit recipe form', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Only the author of this recipe can do that.'
     );
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 });

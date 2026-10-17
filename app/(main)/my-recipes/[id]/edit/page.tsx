@@ -27,7 +27,7 @@ export default async function EditRecipePage({ params }: PageProps) {
   return (
     <Container size="md" px={0}>
       <div className={styles.Header}>
-        <BackButton />
+        <BackButton href={`${Routes.MY_RECIPES}/${recipe.id}`} />
         <Title ta="center">Edit Recipe</Title>
       </div>
       <Container size="sm" px={0} mt="lg" mb="xl">
