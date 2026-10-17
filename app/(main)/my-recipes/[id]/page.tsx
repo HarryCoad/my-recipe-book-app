@@ -1,6 +1,5 @@
-import { cache, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import styles from './myRecipe.module.scss';
 import {
   IconBookmark,
@@ -9,15 +8,16 @@ import {
   IconInfoCircle,
   IconLock,
   IconMessage2,
+  IconPencil,
   IconSlice,
   IconUser,
   IconUsers,
 } from '@tabler/icons-react';
-import { isAxiosError } from 'axios';
 import {
   Alert,
   Anchor,
   Badge,
+  Button,
   Container,
   Grid,
   GridCol,
@@ -33,32 +33,14 @@ import {
 import BackButton from '@/components/BackButton/BackButton';
 import { Routes } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
-import { endpoints } from '@/helpers/endpoints';
 import { formatIngredient, groupIngredients } from '@/helpers/recipes';
-import { getSession, serverGet } from '@/helpers/serverApi';
-import { RecipeResponse } from '@/types/recipe';
+import { getSession } from '@/helpers/serverApi';
+import { getRecipe } from './getRecipe';
 
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ original?: string }>;
 };
-
-// Cached for the request, so generateMetadata and the page share one API call
-const getRecipe = cache(async (id: string, original: boolean) => {
-  try {
-    const res = await serverGet<RecipeResponse>(endpoints.recipes.view(id), {
-      params: original ? { original: true } : undefined,
-    });
-    return res.data;
-  } catch (err) {
-    // 404 when it doesn't exist or isn't visible to this user, 400 when the id is malformed
-    const status = isAxiosError(err) ? err.response?.status : undefined;
-    if (status === 404 || status === 400) {
-      notFound();
-    }
-    throw err;
-  }
-});
 
 const readParams = async ({ params, searchParams }: PageProps) => ({
   id: (await params).id,
@@ -120,6 +102,20 @@ export default async function RecipePage(props: PageProps) {
           </Badge>
         )}
       </Group>
+
+      {isAuthor && (
+        <Group justify="center" mt="md">
+          <Button
+            component={Link}
+            href={`${recipeHref}/edit`}
+            variant="light"
+            color="orange"
+            leftSection={<IconPencil size={16} />}
+          >
+            Edit recipe
+          </Button>
+        </Group>
+      )}
 
       <Stack gap="sm" mt="lg" maw={700} mx="auto">
         {original && (

@@ -135,18 +135,20 @@ export const stepRowIndex = (steps: StepRow[], apiIndex: number) => {
 // Builds form rows from the API's ingredients, adding a heading wherever the subheader changes.
 // An ingredient without a subheader after one with a subheader can't be shown on its own, so it
 // joins the group above it. The form never saves recipes in that order.
+// Keys are fixed rather than from newKey(), because the edit form renders on the server first and
+// both sides must build the same rows. The `saved-` prefix can't clash with newKey()'s `row-`.
 export const rowsFromIngredients = (
   ingredients: { quantity: number; unit: string; name: string; subheader?: string | null }[]
 ): IngredientListRow[] => {
   const rows: IngredientListRow[] = [];
   let current: string | null = null;
-  for (const { subheader, quantity, unit, name } of ingredients) {
+  ingredients.forEach(({ subheader, quantity, unit, name }, i) => {
     const heading = subheader?.trim() || null;
     if (heading && heading !== current) {
-      rows.push({ kind: 'heading', key: newKey(), text: heading });
+      rows.push({ kind: 'heading', key: `saved-heading-${i}`, text: heading });
     }
     current = heading;
-    rows.push({ kind: 'ingredient', key: newKey(), quantity, unit, name });
-  }
+    rows.push({ kind: 'ingredient', key: `saved-ingredient-${i}`, quantity, unit, name });
+  });
   return rows;
 };

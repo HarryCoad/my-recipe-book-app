@@ -105,6 +105,20 @@ describe('Recipe page', () => {
     expect(screen.queryByText('By alice')).not.toBeInTheDocument();
   });
 
+  it('lets only the author edit the recipe', async () => {
+    respond({ authorId: 'me' });
+    const { unmount } = await renderPage();
+    expect(screen.getByRole('link', { name: 'Edit recipe' })).toHaveAttribute(
+      'href',
+      '/my-recipes/r1/edit'
+    );
+    unmount();
+
+    respond();
+    await renderPage();
+    expect(screen.queryByRole('link', { name: 'Edit recipe' })).not.toBeInTheDocument();
+  });
+
   it('offers the original when the user has personal edits', async () => {
     respond({}, true);
     await renderPage();

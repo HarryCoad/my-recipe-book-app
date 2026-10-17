@@ -1,12 +1,13 @@
 import { withZodSchema } from 'formik-validator-zod';
 import { z, ZodSchema } from 'zod';
 import { MAX_TAG_LENGTH, MAX_TAGS, normaliseTags } from '@/helpers/tags';
-import { CreateRecipeBody, RECIPE_CATEGORIES, UNITS } from '@/types/recipe';
+import { CreateRecipeBody, Recipe, RECIPE_CATEGORIES, UNITS } from '@/types/recipe';
 import {
   groupRange,
   IngredientListRow,
   ingredientRowIndex,
   isEmptyIngredient,
+  rowsFromIngredients,
   StepRow,
   stepRowIndex,
 } from './rows';
@@ -41,6 +42,25 @@ export const emptyRecipe: RecipeFormValues = {
   bPrivate: false,
   bAllowSuggestions: false,
 };
+
+// The form filled in with a saved recipe, for editing it. Keys are fixed (see rowsFromIngredients)
+export const recipeToFormValues = (recipe: Recipe): RecipeFormValues => ({
+  title: recipe.title,
+  description: recipe.description,
+  category: recipe.category,
+  serves: recipe.serves,
+  prepTime: recipe.prepTime,
+  cookTime: recipe.cookTime,
+  ingredients: recipe.ingredients.length
+    ? rowsFromIngredients(recipe.ingredients)
+    : emptyRecipe.ingredients,
+  steps: recipe.steps.length
+    ? recipe.steps.map((text, i) => ({ key: `saved-step-${i}`, text }))
+    : emptyRecipe.steps,
+  tags: recipe.tags,
+  bPrivate: recipe.bPrivate,
+  bAllowSuggestions: recipe.bAllowSuggestions,
+});
 
 // An empty number input counts as missing rather than as 0
 const positiveNumber = (missing: string, { integer = false } = {}) => {

@@ -113,4 +113,9 @@ describe('ingredient rows', () => {
       'basil',
     ]);
   });
+
+  it('gives built rows the same keys every time, so server and browser rendering agree', () => {
+    const saved = [{ quantity: 1, unit: 'g', name: 'salt', subheader: 'Sauce' }];
+    expect(keys(rowsFromIngredients(saved))).toEqual(keys(rowsFromIngredients(saved)));
+  });
 });

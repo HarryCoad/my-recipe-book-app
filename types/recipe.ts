@@ -83,6 +83,10 @@ export type CreateRecipeBody = {
 
 export type CreateRecipeResponse = APIResponse<{ recipe: Recipe }>;
 
+// PATCH /recipes/update-own-recipe: author only. Fields left out stay as they are
+export type UpdateOwnRecipeBody = { id: string } & Partial<CreateRecipeBody>;
+export type UpdateOwnRecipeResponse = APIResponse<{ recipe: Recipe }>;
+
 // GET /recipes/tags: existing tags for autocomplete, most used first
 export type TagSuggestion = { tag: string; count: number };
 export type TagSuggestionsResponse = APIResponse<{ tags: TagSuggestion[] }>;

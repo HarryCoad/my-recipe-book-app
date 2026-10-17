@@ -12,9 +12,8 @@ export function CreateRecipeForm() {
 
   // Errors are shown by RecipeForm. The API answers failures with an error status, so axios throws
   const handleSubmit = async (body: CreateRecipeBody) => {
-    await axios.post<CreateRecipeResponse>(endpoints.recipes.create, body);
-    // My Recipes renders on the server, so it will include the new recipe
-    router.push(Routes.MY_RECIPES);
+    const res = await axios.post<CreateRecipeResponse>(endpoints.recipes.create, body);
+    router.push(`${Routes.MY_RECIPES}/${res.data.data.recipe.id}`);
   };
 
   return (
