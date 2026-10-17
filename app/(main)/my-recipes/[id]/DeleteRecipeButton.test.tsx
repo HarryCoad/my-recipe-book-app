@@ -1,4 +1,5 @@
 import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
+import { notifications } from '@mantine/notifications';
 import axios from '@/helpers/axios';
 import { render, screen, userEvent, waitFor } from '@/test-utils';
 import { DeleteRecipeButton } from './DeleteRecipeButton';
@@ -11,6 +12,8 @@ jest.mock('@/helpers/axios', () => ({
   default: { post: jest.fn() },
 }));
 const post = axios.post as jest.Mock;
+jest.mock('@mantine/notifications', () => ({ notifications: { show: jest.fn() } }));
+const showToast = notifications.show as jest.Mock;
 
 const openDialog = async (savedCount = 1) => {
   render(<DeleteRecipeButton id="r1" title="Spaghetti pomodoro" savedCount={savedCount} />);
@@ -31,6 +34,9 @@ describe('Delete recipe button', () => {
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/my-recipes'));
     expect(post).toHaveBeenCalledWith('/api/v1/recipes/delete', { id: 'r1' });
+    expect(showToast).toHaveBeenCalledWith(
+      expect.objectContaining({ message: '"Spaghetti pomodoro" was deleted' })
+    );
   });
 
   it('explains that other savers keep their copy', async () => {
@@ -62,5 +68,6 @@ describe('Delete recipe button', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent("This recipe doesn't exist");
     expect(screen.getByRole('dialog')).toBeVisible();
     expect(replace).not.toHaveBeenCalled();
+    expect(showToast).not.toHaveBeenCalled();
   });
 });

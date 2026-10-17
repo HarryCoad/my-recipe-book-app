@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconAlertCircle, IconTrash } from '@tabler/icons-react';
+import { IconAlertCircle, IconCheck, IconTrash } from '@tabler/icons-react';
 import { ActionIcon, Alert, Button, Group, Modal, Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
 import axios from '@/helpers/axios';
 import { Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
@@ -39,6 +40,11 @@ export function DeleteRecipeButton({ id, title, savedCount }: DeleteRecipeButton
     try {
       const body: DeleteRecipeBody = { id };
       await axios.post(endpoints.recipes.delete, body);
+      notifications.show({
+        color: 'green',
+        icon: <IconCheck size={18} />,
+        message: `"${title}" was deleted`,
+      });
       // Replaces the recipe in the history, so Back doesn't return to it
       router.replace(Routes.MY_RECIPES);
     } catch (err) {
