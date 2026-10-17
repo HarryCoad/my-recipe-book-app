@@ -1,6 +1,6 @@
 import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
 import { serverGet } from '@/helpers/serverApi';
-import { render, screen, within } from '@/test-utils';
+import { render, screen, userEvent, within } from '@/test-utils';
 import { Recipe } from '@/types/recipe';
 import RecipePage, { generateMetadata } from './page';
 
@@ -103,6 +103,32 @@ describe('Recipe page', () => {
     expect(screen.getByText('Private')).toBeVisible();
     expect(screen.getByText('Saved by 3 people')).toBeVisible();
     expect(screen.queryByText('By alice')).not.toBeInTheDocument();
+  });
+
+  it('scales the ingredients to the number of servings chosen', async () => {
+    respond();
+    await renderPage();
+    const fewer = screen.getByRole('button', { name: 'Fewer servings' });
+    const more = screen.getByRole('button', { name: 'More servings' });
+
+    await userEvent.click(more);
+    expect(screen.getByText('Serves 5')).toBeVisible();
+    expect(screen.getByText('Scaled from 4 servings')).toBeVisible();
+    expect(screen.getByText('500g spaghetti')).toBeVisible();
+    expect(screen.getByText('3¾ cloves garlic')).toBeVisible();
+    expect(screen.getByText('2½ tbsp olive oil')).toBeVisible();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
+    expect(screen.getByText('400g spaghetti')).toBeVisible();
+    expect(screen.queryByText(/Scaled from/)).not.toBeInTheDocument();
+
+    // Never fewer than 1
+    for (let i = 0; i < 3; i++) {
+      await userEvent.click(fewer);
+    }
+    expect(screen.getByText('Serves 1')).toBeVisible();
+    expect(screen.getByText('100g spaghetti')).toBeVisible();
+    expect(fewer).toBeDisabled();
   });
 
   it('lets only the author edit the recipe', async () => {

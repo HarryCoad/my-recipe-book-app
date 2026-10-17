@@ -22,9 +22,6 @@ import {
   Grid,
   GridCol,
   Group,
-  List,
-  ListItem,
-  Paper,
   Stack,
   Text,
   ThemeIcon,
@@ -33,9 +30,9 @@ import {
 import BackButton from '@/components/BackButton/BackButton';
 import { Routes } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
-import { formatIngredient, groupIngredients } from '@/helpers/recipes';
 import { getSession } from '@/helpers/serverApi';
 import { getRecipe } from './getRecipe';
+import { IngredientsPanel } from './IngredientsPanel';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -64,7 +61,6 @@ export default async function RecipePage(props: PageProps) {
   const isAuthor = recipe.authorId === userId;
   // The author deleted it, but it's kept for the people who saved it
   const orphaned = recipe.authorName === null;
-  const groups = groupIngredients(recipe.ingredients);
 
   return (
     <Container size="lg" px={0} pb="xl">
@@ -176,27 +172,7 @@ export default async function RecipePage(props: PageProps) {
 
       <Grid mt="sm" gutter="xl">
         <GridCol span={{ base: 12, md: 5 }}>
-          <Paper withBorder p="lg" radius="md">
-            <Title order={3} mb="md">
-              Ingredients
-            </Title>
-            <Stack gap="lg">
-              {groups.map((group, i) => (
-                <div key={i}>
-                  {group.subheader && (
-                    <Title order={4} size="h5" mb="xs" c="orange">
-                      {group.subheader}
-                    </Title>
-                  )}
-                  <List spacing="xs">
-                    {group.ingredients.map((ingredient) => (
-                      <ListItem key={ingredient.id}>{formatIngredient(ingredient)}</ListItem>
-                    ))}
-                  </List>
-                </div>
-              ))}
-            </Stack>
-          </Paper>
+          <IngredientsPanel ingredients={recipe.ingredients} serves={recipe.serves} />
         </GridCol>
 
         <GridCol span={{ base: 12, md: 7 }}>

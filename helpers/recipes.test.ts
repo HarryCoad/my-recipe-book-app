@@ -42,6 +42,23 @@ describe('formatIngredient', () => {
   ])('%o reads as "%s"', (parts, expected) => {
     expect(formatIngredient({ id: 'x', subheader: null, ...parts } as Ingredient)).toBe(expected);
   });
+
+  it.each<[Partial<Ingredient>, number, string]>([
+    [{ quantity: 200, unit: 'g', name: 'flour' }, 1.5, '300g flour'],
+    [{ quantity: 125, unit: 'ml', name: 'milk' }, 1 / 3, '42ml milk'],
+    [{ quantity: 5, unit: 'g', name: 'salt' }, 0.25, '1.3g salt'],
+    [{ quantity: 1.5, unit: 'kg', name: 'potatoes' }, 1 / 3, '0.5kg potatoes'],
+    [{ quantity: 1, unit: 'liter', name: 'stock' }, 1.5, '1.5 liters stock'],
+    [{ quantity: 3, unit: 'pieces', name: 'eggs' }, 1.25, '3¾ eggs'],
+    [{ quantity: 2, unit: 'tbsp', name: 'oil' }, 1 / 4, '½ tbsp oil'],
+    [{ quantity: 1, unit: 'tsp', name: 'cumin' }, 1 / 3, '⅓ tsp cumin'],
+    [{ quantity: 2, unit: 'cloves', name: 'garlic' }, 2.98, '6 cloves garlic'],
+    [{ quantity: 1, unit: 'pieces', name: 'lemon' }, 1 / 8, '¼ lemon'],
+  ])('%o times %d reads as "%s"', (parts, scale, expected) => {
+    expect(formatIngredient({ id: 'x', subheader: null, ...parts } as Ingredient, scale)).toBe(
+      expected
+    );
+  });
 });
 
 describe('convertMinutesToHoursAndMinutes', () => {
