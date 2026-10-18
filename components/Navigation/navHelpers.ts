@@ -3,7 +3,6 @@ import {
   IconBurger,
   IconChefHat,
   IconGauge,
-  IconLock,
   IconMessage2,
 } from '@tabler/icons-react';
 import { Routes } from '@/helpers/constants';
@@ -16,12 +15,12 @@ export const NAV_DATA: LinksGroupProps[] = [
   { label: 'My Suggestions', icon: IconMessage2, link: Routes.MY_SUGGESTIONS },
   // { label: 'Analytics', icon: IconPresentationAnalytics, link: Routes.ANALYTICS },
   { label: 'Settings', icon: IconAdjustments, link: Routes.SETTINGS },
-  {
-    label: 'Security',
-    icon: IconLock,
-    links: [
-      // { label: 'Enable 2FA', link: Routes.SECURITY_MFA },
-      { label: 'Change password', link: Routes.SECURITY_CHANGE_PASSWORD },
-    ],
-  },
+  // {
+  //   label: 'Security',
+  //   icon: IconLock,
+  //   links: [
+  //     // { label: 'Enable 2FA', link: Routes.SECURITY_MFA },
+  //     { label: 'Change password', link: Routes.SECURITY_CHANGE_PASSWORD },
+  //   ],
+  // },
 ];

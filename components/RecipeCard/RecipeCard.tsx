@@ -10,7 +10,8 @@ import {
   IconToolsKitchen3,
   IconUser,
 } from '@tabler/icons-react';
-import { Badge, Button, Container, Flex, Text, Tooltip } from '@mantine/core';
+import { Badge, Button, Container, Flex, Text } from '@mantine/core';
+import { BadgeLink } from '@/components/TooltipLink/TooltipLink';
 import { reviewSuggestionsPath } from '@/helpers/constants';
 import { RecipeSearchResult } from '@/types/recipe';
 
@@ -45,19 +46,14 @@ export function RecipeCard({ recipe, href, isOwn, action }: RecipeCardProps) {
           <Flex gap={6} align="center">
             {/* Only the author gets a count, and it goes straight to reviewing them */}
             {pending > 0 && (
-              <Tooltip label="Review suggestions">
-                <Badge
-                  component={Link}
-                  href={reviewSuggestionsPath(recipe.id)}
-                  variant="filled"
-                  color="red"
-                  leftSection={<IconMessage2 size={12} />}
-                  style={{ cursor: 'pointer' }}
-                  aria-label={`${pending} ${pending === 1 ? 'suggestion' : 'suggestions'} waiting for review`}
-                >
-                  {pending}
-                </Badge>
-              </Tooltip>
+              <BadgeLink
+                label="Review suggestions"
+                ariaLabel={`${pending} ${pending === 1 ? 'suggestion' : 'suggestions'} waiting for review`}
+                href={reviewSuggestionsPath(recipe.id)}
+                leftSection={<IconMessage2 size={12} />}
+              >
+                {pending}
+              </BadgeLink>
             )}
             {isOwn && (
               <Badge variant="light" color="blue" leftSection={<IconUser size={12} />}>

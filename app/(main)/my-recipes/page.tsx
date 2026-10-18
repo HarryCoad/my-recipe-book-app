@@ -70,7 +70,7 @@ export default async function MyRecipes({ searchParams }: PageProps) {
         </Text>
       ) : (
         // Unsaving takes a recipe out of the book
-        <RecipeList recipes={recipes} userId={userId} showOwnBadge={!onlyMine} />
+        <RecipeList recipes={recipes} userId={userId} />
       )}
 
       <RecipePagination page={page} totalPages={totalPages} />

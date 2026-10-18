@@ -1,3 +1,5 @@
+// `mantine` is _mantine.scss, added to every SCSS file by next.config.mjs. Its hover mixin only
+// applies on devices that can hover, and uses :active on touch screens instead
 .control {
   font-weight: 500;
   display: block;
@@ -5,10 +7,25 @@
   padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
   color: var(--mantine-color-text);
   font-size: var(--mantine-font-size-sm);
+  transition:
+    background-color 100ms ease,
+    color 100ms ease;
 
-  @mixin hover {
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+  @include mantine.hover {
+    background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  }
+
+  // The page the user is on
+  &[data-active] {
+    background-color: light-dark(var(--mantine-color-orange-0), var(--mantine-color-dark-5));
+    color: light-dark(var(--mantine-color-orange-8), var(--mantine-color-orange-3));
+    box-shadow: inset 3px 0 0 var(--mantine-color-orange-6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-color-orange-6);
+    outline-offset: -2px;
   }
 }
 
@@ -22,13 +39,23 @@
   font-size: var(--mantine-font-size-sm);
   color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
   border-left: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  transition:
+    background-color 100ms ease,
+    color 100ms ease;
 
-  @mixin hover {
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+  @include mantine.hover {
+    background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
   }
 }
 
 .chevron {
   transition: transform 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control,
+  .link {
+    transition: none;
+  }
 }

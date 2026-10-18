@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import classes from './NavLinkGroup.module.scss';
 import { IconChevronRight } from '@tabler/icons-react';
 import { Box, Collapse, Group, ThemeIcon, UnstyledButton } from '@mantine/core';
+import { Routes } from '@/helpers/constants';
 
 export interface LinksGroupProps {
   icon: React.FC<any>;
@@ -15,6 +16,9 @@ export interface LinksGroupProps {
 
 export function NavLinkGroup({ icon: Icon, label, initiallyOpened, links, link }: LinksGroupProps) {
   const pathname = usePathname();
+  // Its own page, or one inside it like /recipes/<id>. Home only matches itself
+  const active =
+    !!link && (pathname === link || (link !== Routes.HOME && pathname.startsWith(`${link}/`)));
 
   const hasLinks = Array.isArray(links);
   const [opened, setOpened] = useState(
@@ -34,6 +38,8 @@ export function NavLinkGroup({ icon: Icon, label, initiallyOpened, links, link }
         href={link ? link : undefined}
         onClick={() => setOpened((o) => !o)}
         className={classes.control}
+        data-active={active || undefined}
+        aria-current={active ? 'page' : undefined}
       >
         <Group justify="space-between" gap={0}>
           <Box style={{ display: 'flex', alignItems: 'center' }}>

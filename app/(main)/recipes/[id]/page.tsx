@@ -16,7 +16,6 @@ import {
 } from '@tabler/icons-react';
 import { isAxiosError } from 'axios';
 import {
-  ActionIcon,
   Alert,
   Anchor,
   Badge,
@@ -24,15 +23,14 @@ import {
   Grid,
   GridCol,
   Group,
-  Indicator,
   Stack,
   Text,
   ThemeIcon,
   Title,
-  Tooltip,
 } from '@mantine/core';
 import BackButton from '@/components/BackButton/BackButton';
 import { SaveRecipeButton } from '@/components/SaveRecipeButton/SaveRecipeButton';
+import { IconLink } from '@/components/TooltipLink/TooltipLink';
 import {
   recipePath,
   reviewSuggestionsPath,
@@ -95,35 +93,16 @@ export default async function RecipePage(props: PageProps) {
         {!isAuthor && (
           <Group justify="flex-end" gap="xs" wrap="nowrap">
             {canSuggest(recipe, userId) ? (
-              <Tooltip label="Suggest changes">
-                <ActionIcon
-                  component={Link}
-                  href={suggestPath(recipe.id)}
-                  replace
-                  variant="light"
-                  color="orange"
-                  size="lg"
-                  aria-label="Suggest changes"
-                >
-                  <IconMessagePlus size={18} />
-                </ActionIcon>
-              </Tooltip>
+              <IconLink label="Suggest changes" href={suggestPath(recipe.id)} replace>
+                <IconMessagePlus size={18} />
+              </IconLink>
             ) : (
               // Open to suggestions, but only from people who saved it
               recipe.bAllowSuggestions &&
               !orphaned && (
-                <Tooltip label="Save this recipe to suggest changes">
-                  <ActionIcon
-                    variant="light"
-                    color="orange"
-                    size="lg"
-                    aria-label="Suggest changes"
-                    aria-disabled
-                    data-disabled
-                  >
-                    <IconMessagePlus size={18} />
-                  </ActionIcon>
-                </Tooltip>
+                <IconLink label="Save this recipe to suggest changes" ariaLabel="Suggest changes">
+                  <IconMessagePlus size={18} />
+                </IconLink>
               )
             )}
             <SaveRecipeButton
@@ -137,50 +116,27 @@ export default async function RecipePage(props: PageProps) {
         )}
         {isAuthor && (
           <Group justify="flex-end" gap="xs" wrap="nowrap">
-            <Tooltip
+            <IconLink
               label={
                 pendingSuggestions > 0
                   ? `Review suggestions (${pendingSuggestions} waiting)`
                   : 'Review suggestions'
               }
+              ariaLabel={
+                pendingSuggestions > 0
+                  ? `Review suggestions, ${pendingSuggestions} waiting`
+                  : 'Review suggestions'
+              }
+              href={reviewSuggestionsPath(recipe.id)}
+              count={pendingSuggestions}
             >
-              <Indicator
-                label={pendingSuggestions}
-                disabled={pendingSuggestions === 0}
-                color="red"
-                size={16}
-              >
-                <ActionIcon
-                  component={Link}
-                  href={reviewSuggestionsPath(recipe.id)}
-                  variant="light"
-                  color="orange"
-                  size="lg"
-                  aria-label={
-                    pendingSuggestions > 0
-                      ? `Review suggestions, ${pendingSuggestions} waiting`
-                      : 'Review suggestions'
-                  }
-                >
-                  <IconMessage2 size={18} />
-                </ActionIcon>
-              </Indicator>
-            </Tooltip>
-            <Tooltip label="Edit recipe">
-              {/* Editing takes the recipe's place in the history, and saving or cancelling puts
-                  it back, so the history never holds both */}
-              <ActionIcon
-                component={Link}
-                href={`${recipeHref}/edit`}
-                replace
-                variant="light"
-                color="orange"
-                size="lg"
-                aria-label="Edit recipe"
-              >
-                <IconPencil size={18} />
-              </ActionIcon>
-            </Tooltip>
+              <IconMessage2 size={18} />
+            </IconLink>
+            {/* Editing takes the recipe's place in the history, and saving or cancelling puts it
+                back, so the history never holds both */}
+            <IconLink label="Edit recipe" href={`${recipeHref}/edit`} replace>
+              <IconPencil size={18} />
+            </IconLink>
             <DeleteRecipeButton
               id={recipe.id}
               title={recipe.title}
