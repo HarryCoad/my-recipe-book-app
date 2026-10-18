@@ -8,6 +8,7 @@ export const endpoints = {
     create: '/api/v1/recipes/create',
     updateOwn: '/api/v1/recipes/update-own-recipe',
     delete: '/api/v1/recipes/delete',
+    toggleSave: '/api/v1/recipes/toggle-save',
     tags: '/api/v1/recipes/tags',
     view: (id: string) => `/api/v1/recipes/${encodeURIComponent(id)}`,
   },

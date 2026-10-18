@@ -16,3 +16,6 @@ export enum Routes {
   SECURITY_MFA = `${Routes.SECURITY}/enable-2fa`,
   SECURITY_CHANGE_PASSWORD = `${Routes.SECURITY}/change-password`,
 }
+
+// Any recipe the user can see, whoever wrote it
+export const recipePath = (id: string) => `${Routes.RECIPES}/${id}`;

@@ -10,6 +10,17 @@ export default withBundleAnalyzer({
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async redirects() {
+    return [
+      // Recipe pages moved from /my-recipes/<id>, since they show anyone's recipe.
+      // /my-recipes/new is still the create page
+      {
+        source: '/my-recipes/:id((?!new$)[^/]+)/:rest*',
+        destination: '/recipes/:id/:rest*',
+        permanent: true,
+      },
+    ];
+  },
   experimental: {
     optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
   },

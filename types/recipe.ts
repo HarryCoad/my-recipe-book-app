@@ -9,7 +9,8 @@ export interface Recipe {
   bPrivate: boolean;
   bAllowSuggestions: boolean;
   title: string;
-  description: string;
+  // Null for older recipes saved without one. New and updated recipes must have one
+  description: string | null;
   category: string;
   serves: number;
   prepTime: number;
@@ -89,6 +90,10 @@ export type UpdateOwnRecipeResponse = APIResponse<{ recipe: Recipe }>;
 
 // POST /recipes/delete: author only. Responds with `data: null`
 export type DeleteRecipeBody = { id: string };
+
+// POST /recipes/toggle-save. Responds with `data: null`. Unsaving a recipe the user has a personal
+// edit on fails with CONFIRM_LOSE_EDITS until it's resent with bConfirmLoseEdits
+export type ToggleSaveBody = { id: string; bSave: boolean; bConfirmLoseEdits?: boolean };
 
 // GET /recipes/tags: existing tags for autocomplete, most used first
 export type TagSuggestion = { tag: string; count: number };

@@ -1,9 +1,8 @@
-import styles from '../[id]/myRecipe.module.scss';
+import styles from '../../recipes/[id]/myRecipe.module.scss';
 import { Container, Title } from '@mantine/core';
 import BackButton from '@/components/BackButton/BackButton';
 import { CreateRecipeForm } from './CreateRecipeForm';
 
-// This static route takes priority over [id], so /my-recipes/new isn't treated as a recipe id
 const NewRecipe = () => {
   return (
     <Container size="md" px={0}>

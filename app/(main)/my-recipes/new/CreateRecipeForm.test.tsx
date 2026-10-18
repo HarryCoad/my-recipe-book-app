@@ -71,7 +71,7 @@ describe('Create recipe form', () => {
     await userEvent.click(screen.getByLabelText(/^Allow suggestions/));
     await submit();
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/my-recipes/r1'));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/recipes/r1'));
     // The empty rows Tab left behind (ingredient 3, and one after the syrup) are ignored
     expect(post).toHaveBeenCalledWith('/api/v1/recipes/create', {
       title: 'Pancakes',

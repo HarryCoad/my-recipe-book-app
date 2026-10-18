@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import Link from 'next/link';
 import styles from './RecipeCard.module.scss';
 import {
@@ -6,20 +7,25 @@ import {
   IconPizza,
   IconSlice,
   IconToolsKitchen3,
+  IconUser,
 } from '@tabler/icons-react';
-import { Button, Container, Flex, Text } from '@mantine/core';
+import { Badge, Button, Container, Flex, Text } from '@mantine/core';
 import { Recipe } from '@/types/recipe';
 
 const DESCRIPTION_LENGTH = 270;
 
 type RecipeCardProps = {
   recipe: Recipe;
-  // Where "View Recipe" goes, e.g. `/my-recipes/<id>`
+  // Where "View Recipe" goes, e.g. `/recipes/<id>`
   href: string;
+  // Shows a "Your recipe" badge, for lists that mix the user's recipes with other people's
+  isOwn?: boolean;
+  // Shown in the top right corner, such as a save button
+  action?: ReactNode;
 };
 
 // No client code, so it renders on the server unless a client component uses it
-export function RecipeCard({ recipe, href }: RecipeCardProps) {
+export function RecipeCard({ recipe, href, isOwn, action }: RecipeCardProps) {
   return (
     <article className={styles.card}>
       {/* Recipes don't have images yet, so show a placeholder */}
@@ -32,9 +38,17 @@ export function RecipeCard({ recipe, href }: RecipeCardProps) {
       <div className={styles.content}>
         <Flex justify="space-between" gap={10} align="center" mt={10}>
           <Text size="xl">{recipe.title}</Text>
-          <span title="Category" className={`${styles.iconInfo} ${styles.category}`}>
-            {recipe.category}
-          </span>
+          <Flex gap={6} align="center">
+            {isOwn && (
+              <Badge variant="light" color="blue" leftSection={<IconUser size={12} />}>
+                Your recipe
+              </Badge>
+            )}
+            <span title="Category" className={`${styles.iconInfo} ${styles.category}`}>
+              {recipe.category}
+            </span>
+            {action}
+          </Flex>
         </Flex>
 
         <Container mt={10} w="100%" p={0}>
@@ -55,10 +69,12 @@ export function RecipeCard({ recipe, href }: RecipeCardProps) {
               </span>
             </Flex>
           </div>
-          <Text size="sm" c="dimmed" mt={10}>
-            {recipe.description.slice(0, DESCRIPTION_LENGTH)}
-            {recipe.description.length > DESCRIPTION_LENGTH ? '... ' : ' '}
-          </Text>
+          {recipe.description && (
+            <Text size="sm" c="dimmed" mt={10}>
+              {recipe.description.slice(0, DESCRIPTION_LENGTH)}
+              {recipe.description.length > DESCRIPTION_LENGTH ? '... ' : ' '}
+            </Text>
+          )}
           <div className={styles.clearfix} />
         </Container>
 

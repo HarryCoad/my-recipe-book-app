@@ -5,7 +5,7 @@ import { IconPlus } from '@tabler/icons-react';
 import { Button, Text, Title } from '@mantine/core';
 import { RecipeCard } from '@/components/RecipeCard/RecipeCard';
 import { RecipePagination } from '@/components/RecipePagination/RecipePagination';
-import { Routes } from '@/helpers/constants';
+import { recipePath, Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
 import { getSession, serverGet } from '@/helpers/serverApi';
 import { RecipeSearchResponse } from '@/types/recipe';
@@ -52,7 +52,7 @@ export default async function MyRecipes({ searchParams }: PageProps) {
         <ul className={styles.list}>
           {recipes.map((recipe) => (
             <li key={recipe.id}>
-              <RecipeCard recipe={recipe} href={`${Routes.MY_RECIPES}/${recipe.id}`} />
+              <RecipeCard recipe={recipe} href={recipePath(recipe.id)} />
             </li>
           ))}
         </ul>

@@ -42,7 +42,7 @@ describe('My recipes page', () => {
     expect(screen.getByText(second.title)).toBeVisible();
     expect(screen.getAllByRole('link', { name: 'View Recipe' })[0]).toHaveAttribute(
       'href',
-      `/my-recipes/${first.id}`
+      `/recipes/${first.id}`
     );
     expect(get).toHaveBeenCalledWith('/api/v1/recipes/search', {
       params: { authorId: 'me', page: 1 },

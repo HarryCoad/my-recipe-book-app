@@ -17,6 +17,8 @@ const myColor: MantineColorsTuple = [
 
 export const theme = createTheme({
   /* Put your mantine theme override here */
+  // Mantine gives switches and checkboxes the default arrow cursor otherwise
+  cursorType: 'pointer',
   colors: {
     myColor,
   },

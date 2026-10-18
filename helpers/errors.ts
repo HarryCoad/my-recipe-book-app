@@ -15,6 +15,7 @@ export const errorMessages: Record<string, string> = {
   USE_UPDATE_OWN_RECIPE_ENDPOINT: 'You are the author, so edit the recipe directly.',
   USER_DOESNT_OWN_RECIPE: 'Only the author of this recipe can do that.',
   CONFIRM_LOSE_EDITS: 'Unsaving this recipe will delete your personal edits.',
+  AUTHOR_CANT_UNSAVE: "You can't unsave your own recipe. Delete it instead.",
   SUGGESTION_ALREADY_REVIEWED: 'This suggestion has already been reviewed.',
   USERNAME_TAKEN: 'That username is already taken.',
   UNIQUE_EMAIL: 'An account with that email already exists.',

@@ -46,7 +46,8 @@ export const emptyRecipe: RecipeFormValues = {
 // The form filled in with a saved recipe, for editing it. Keys are fixed (see rowsFromIngredients)
 export const recipeToFormValues = (recipe: Recipe): RecipeFormValues => ({
   title: recipe.title,
-  description: recipe.description,
+  // Older recipes have none, and saving asks for one
+  description: recipe.description ?? '',
   category: recipe.category,
   serves: recipe.serves,
   prepTime: recipe.prepTime,
