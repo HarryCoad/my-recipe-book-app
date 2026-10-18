@@ -22,6 +22,7 @@ export const errorMessages: Record<string, string> = {
   FETCH_FAILED: "We couldn't load that page. Check the link works, or try another.",
   INVALID_IMAGE: 'Please choose a JPEG, PNG, GIF or WebP image.',
   IMAGE_TOO_LARGE: 'That image is too big. Please use one under 5 MB.',
+  TOO_MANY_IMAGES: 'A recipe can be read from up to 4 photos.',
   NO_RECIPE_FOUND: "We couldn't find a recipe there.",
   IMPORT_FAILED: 'Something went wrong reading the recipe. Please try again.',
   TOO_MANY_IMPORTS: "You've imported a lot of recipes recently. Please wait an hour and try again.",

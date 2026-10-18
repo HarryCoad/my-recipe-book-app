@@ -321,6 +321,70 @@ describe('Creating a recipe from an import', () => {
     expect(step2).toHaveValue('Cook');
   });
 
+  describe('with "Create it straight away" on', () => {
+    const toggle = () => screen.getByRole('switch', { name: /Create it straight away/ });
+
+    beforeEach(() => window.localStorage.clear());
+    afterEach(() => window.localStorage.clear());
+
+    it('hides the form, which is only needed for an import that needs fixing', async () => {
+      render(<CreateRecipeForm />);
+      expect(toggle()).not.toBeChecked();
+      expect(screen.getByLabelText(/^Title/)).toBeVisible();
+
+      await userEvent.click(toggle());
+      expect(screen.queryByLabelText(/^Title/)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Create recipe' })).not.toBeInTheDocument();
+
+      await userEvent.click(toggle());
+      expect(screen.getByLabelText(/^Title/)).toBeVisible();
+    });
+
+    it('is remembered for next time', async () => {
+      const { unmount } = render(<CreateRecipeForm />);
+      await userEvent.click(toggle());
+      unmount();
+
+      render(<CreateRecipeForm />);
+      expect(toggle()).toBeChecked();
+      expect(screen.queryByLabelText(/^Title/)).not.toBeInTheDocument();
+    });
+
+    it('goes back to just the import panel after starting again', async () => {
+      post.mockResolvedValueOnce({ data: { status: 1, data: { draft, issues, recipe: null } } });
+      render(<CreateRecipeForm />);
+      await userEvent.click(toggle());
+      await userEvent.type(
+        screen.getByLabelText('Recipe web address'),
+        'example.com/pancakes{Enter}'
+      );
+      await screen.findByText('Recipe imported');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Start again' }));
+
+      expect(screen.getByLabelText('Recipe web address')).toBeVisible();
+      expect(screen.queryByLabelText(/^Title/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('explains why a recipe meant to be created straight away opened for review', async () => {
+    // "Create it straight away" is remembered there
+    window.localStorage.clear();
+    post.mockResolvedValueOnce({ data: { status: 1, data: { draft, issues, recipe: null } } });
+    render(<CreateRecipeForm />);
+    await userEvent.click(screen.getByRole('switch', { name: /Create it straight away/ }));
+    await userEvent.type(
+      screen.getByLabelText('Recipe web address'),
+      'example.com/pancakes{Enter}'
+    );
+
+    expect(
+      await screen.findByText(/It wasn't created straight away, because some details/)
+    ).toBeVisible();
+    expect(screen.getByLabelText(/^Title/)).toHaveValue('Pancakes');
+    window.localStorage.clear();
+  });
+
   it('can start again from a blank form', async () => {
     await importDraft();
     await userEvent.click(screen.getByRole('button', { name: 'Start again' }));

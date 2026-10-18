@@ -146,9 +146,13 @@ describe('My recipes page', () => {
       'href',
       '/my-recipes/new?import=url'
     );
-    expect(screen.getByRole('menuitem', { name: 'From a photo' })).toHaveAttribute(
+    expect(screen.getByRole('menuitem', { name: 'From photos' })).toHaveAttribute(
       'href',
       '/my-recipes/new?import=image'
+    );
+    expect(screen.getByRole('menuitem', { name: 'Lots at once' })).toHaveAttribute(
+      'href',
+      '/my-recipes/import'
     );
   });
 

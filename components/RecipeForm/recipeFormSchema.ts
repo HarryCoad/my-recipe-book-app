@@ -34,6 +34,9 @@ export type RecipeFormValues = {
   bAllowSuggestions: boolean;
   // Where an imported recipe came from. Kept as it is: the form doesn't change it
   sourceUrl: string | null;
+  // Identifies the photos a recipe was imported from, so they're spotted if imported again. Only
+  // set from an import's draft, and only sent when creating: updating a recipe refuses it
+  sourceImageHash: string | null;
 };
 
 // The parts IngredientList and StepList edit, so forms other than the full recipe can use them
@@ -55,16 +58,17 @@ export const emptyRecipe: RecipeFormValues = {
   bPrivate: false,
   bAllowSuggestions: false,
   sourceUrl: null,
+  sourceImageHash: null,
 };
 
 // The form filled in with a saved recipe, for editing it. Keys are fixed (see rowsFromIngredients)
 export const recipeToFormValues = (recipe: Recipe): RecipeFormValues => ({
   title: recipe.title,
-  // Older recipes have none, and saving asks for one
+  // Optional, so it can be null
   description: recipe.description ?? '',
   category: recipe.category,
   serves: recipe.serves,
-  prepTime: recipe.prepTime,
+  prepTime: recipe.prepTime || '',
   cookTime: recipe.cookTime,
   ingredients: recipe.ingredients.length
     ? rowsFromIngredients(recipe.ingredients)
@@ -76,6 +80,8 @@ export const recipeToFormValues = (recipe: Recipe): RecipeFormValues => ({
   bPrivate: recipe.bPrivate,
   bAllowSuggestions: recipe.bAllowSuggestions,
   sourceUrl: recipe.sourceUrl ?? null,
+  // Never sent with a saved recipe, and editing must not send it
+  sourceImageHash: null,
 });
 
 // A recipe imported from a web page or photo, for the user to check before creating it. Gaps the
@@ -99,6 +105,7 @@ export const draftToFormValues = (draft: ImportDraft): RecipeFormValues => ({
   bPrivate: draft.bPrivate,
   bAllowSuggestions: false,
   sourceUrl: draft.sourceUrl,
+  sourceImageHash: draft.sourceImageHash ?? null,
 });
 
 // An empty number input counts as missing rather than as 0
@@ -220,10 +227,21 @@ const tagsSchema = z
 // that a recipe needs at least one ingredient and one step
 export const recipeFormSchema = z.object({
   title: requiredText('Please enter a title'),
-  description: requiredText('Please enter a description'),
+  // Optional. Sent even when empty, because an empty one clears it when editing a recipe
+  description: z.string().trim(),
   category: option(RECIPE_CATEGORIES, { one: 'category', many: 'categories' }),
   serves: positiveNumber('Please enter how many it serves', { integer: true }),
-  prepTime: positiveNumber('Please enter the prep time', { integer: true }),
+  // Optional, for recipes with no prep. Empty and 0 both mean none, which is saved as null
+  prepTime: z
+    .preprocess(
+      (value) => (value === '' ? null : value),
+      z
+        .number({ invalid_type_error: 'Please enter a number' })
+        .int('Please use a whole number')
+        .min(0, "Can't be less than 0")
+        .nullable()
+    )
+    .transform((minutes) => minutes || null),
   cookTime: positiveNumber('Please enter the cook time', { integer: true }),
   ingredients: ingredientsSchema,
   steps: stepsSchema,
@@ -235,6 +253,10 @@ export const recipeFormSchema = z.object({
     .string()
     .nullable()
     .transform((url) => url ?? undefined),
+  sourceImageHash: z
+    .string()
+    .nullable()
+    .transform((hash) => hash ?? undefined),
 });
 
 // withZodSchema assumes the form values match the schema's output, but here the inputs can still

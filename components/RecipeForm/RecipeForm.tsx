@@ -34,7 +34,9 @@ import { useFieldError } from './useRowList';
 type RecipeFormProps = {
   initialValues?: RecipeFormValues;
   submitLabel: string;
-  cancelHref: string;
+  // Where Cancel goes. Or give onCancel instead, to stay on the page, such as reviewing an import
+  cancelHref?: string;
+  onCancel?: () => void;
   // Gets the validated, cleaned-up body for the API. If it throws an API error, the form shows it,
   // with any validation errors next to their fields.
   onSubmit: (body: CreateRecipeBody) => Promise<void>;
@@ -49,6 +51,7 @@ export function RecipeForm({
   initialValues = emptyRecipe,
   submitLabel,
   cancelHref,
+  onCancel,
   onSubmit,
   highlightErrors = false,
   mergeableSteps = false,
@@ -100,10 +103,16 @@ export function RecipeForm({
             )}
 
             <Group justify="flex-end">
-              {/* Replaces the form in the history, so Back doesn't return to it */}
-              <Button component={Link} href={cancelHref} replace variant="default">
-                Cancel
-              </Button>
+              {onCancel ? (
+                <Button variant="default" onClick={onCancel}>
+                  Cancel
+                </Button>
+              ) : (
+                // Replaces the form in the history, so Back doesn't return to it
+                <Button component={Link} href={cancelHref ?? '/'} replace variant="default">
+                  Cancel
+                </Button>
+              )}
               <Button type="submit" color="orange" loading={isSubmitting}>
                 {submitLabel}
               </Button>
@@ -119,12 +128,18 @@ function AboutFields() {
   const { values, getFieldProps, setFieldValue } = useFormikContext<RecipeFormValues>();
   const errorFor = useFieldError();
 
-  const numberField = (name: 'serves' | 'prepTime' | 'cookTime', label: string) => (
+  const numberField = (
+    name: 'serves' | 'prepTime' | 'cookTime',
+    label: string,
+    { optional = false } = {}
+  ) => (
     <NumberInput
       label={label}
-      withAsterisk
-      min={1}
+      withAsterisk={!optional}
+      placeholder={optional ? 'Optional' : undefined}
+      min={optional ? 0 : 1}
       allowDecimal={false}
+      allowNegative={false}
       value={values[name]}
       onChange={(value) => setFieldValue(name, value)}
       onBlur={getFieldProps(name).onBlur}
@@ -144,8 +159,8 @@ function AboutFields() {
       />
       <Textarea
         label="Description"
+        description="Optional"
         placeholder="What makes this recipe worth cooking?"
-        withAsterisk
         autosize
         minRows={3}
         error={errorFor('description')}
@@ -169,7 +184,8 @@ function AboutFields() {
       />
       <SimpleGrid cols={{ base: 1, xs: 3 }}>
         {numberField('serves', 'Serves')}
-        {numberField('prepTime', 'Prep time (minutes)')}
+        {/* Left empty for recipes with no prep */}
+        {numberField('prepTime', 'Prep time (minutes)', { optional: true })}
         {numberField('cookTime', 'Cook time (minutes)')}
       </SimpleGrid>
     </Stack>

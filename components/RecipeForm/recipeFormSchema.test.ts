@@ -5,6 +5,7 @@ import {
   formPathForApiField,
   recipeFormSchema,
   RecipeFormValues,
+  recipeToFormValues,
   toRecipeBody,
 } from './recipeFormSchema';
 import { IngredientListRow } from './rows';
@@ -33,6 +34,7 @@ const validRecipe: RecipeFormValues = {
   bPrivate: false,
   bAllowSuggestions: true,
   sourceUrl: null,
+  sourceImageHash: null,
 };
 
 const errorsFor = (values: RecipeFormValues) => {
@@ -52,12 +54,64 @@ describe('recipe form schema', () => {
       tags: ['quick'],
       // Left out when there isn't one
       sourceUrl: undefined,
+      sourceImageHash: undefined,
     });
   });
 
   it('keeps where an imported recipe came from', () => {
     const sourceUrl = 'https://example.com/pancakes';
     expect(toRecipeBody({ ...validRecipe, sourceUrl }).sourceUrl).toBe(sourceUrl);
+  });
+
+  it("sends a photo import's image hash back unchanged, so the photos are recognised again", () => {
+    const sourceImageHash = 'a'.repeat(64);
+    const values = draftToFormValues({
+      title: 'Soup',
+      description: null,
+      category: 'Main',
+      serves: 2,
+      prepTime: 0,
+      cookTime: 10,
+      ingredients: [],
+      steps: [],
+      tags: [],
+      bPrivate: true,
+      sourceUrl: null,
+      sourceImageHash,
+    });
+    expect(values.sourceImageHash).toBe(sourceImageHash);
+    expect(toRecipeBody({ ...validRecipe, sourceImageHash }).sourceImageHash).toBe(sourceImageHash);
+  });
+
+  it('never sends an image hash when editing a saved recipe, since updating refuses it', () => {
+    const values = recipeToFormValues({
+      id: 'r1',
+      authorId: 'me',
+      authorName: 'me',
+      bPrivate: false,
+      bAllowSuggestions: false,
+      title: 'Soup',
+      description: null,
+      category: 'Main',
+      serves: 2,
+      prepTime: null,
+      cookTime: 10,
+      ingredients: [],
+      steps: ['Boil'],
+      tags: [],
+      bSaved: true,
+      savedCount: 1,
+      bDeleted: false,
+    });
+    expect(values.sourceImageHash).toBeNull();
+    expect(
+      'sourceImageHash' in
+        JSON.parse(
+          JSON.stringify(
+            toRecipeBody({ ...validRecipe, ...values, ingredients: validRecipe.ingredients })
+          )
+        )
+    ).toBe(false);
   });
 
   it('saves each heading on the ingredients below it', () => {
@@ -124,10 +178,8 @@ describe('recipe form schema', () => {
   it('reports every missing field on an empty form', () => {
     expect(errorsFor(emptyRecipe)).toEqual({
       title: 'Please enter a title',
-      description: 'Please enter a description',
       category: 'Please choose a category',
       serves: 'Please enter how many it serves',
-      prepTime: 'Please enter the prep time',
       cookTime: 'Please enter the cook time',
       ingredients: 'Please add at least one ingredient',
       steps: 'Please add at least one step',
@@ -143,6 +195,22 @@ describe('recipe form schema', () => {
     ).toEqual({
       'ingredients.0.text': 'Please enter a heading, or remove it',
       'ingredients.2.text': 'Please add an ingredient under this heading, or remove it',
+    });
+  });
+
+  it.each([
+    ['left empty', ''],
+    ['0', 0],
+  ])('saves no prep time when it is %s', (_, prepTime) => {
+    expect(toRecipeBody({ ...validRecipe, prepTime: prepTime as number | '' }).prepTime).toBeNull();
+  });
+
+  it("doesn't allow a negative or part-minute prep time", () => {
+    expect(errorsFor({ ...validRecipe, prepTime: -5 })).toEqual({
+      prepTime: "Can't be less than 0",
+    });
+    expect(errorsFor({ ...validRecipe, prepTime: 2.5 })).toEqual({
+      prepTime: 'Please use a whole number',
     });
   });
 
@@ -208,7 +276,6 @@ describe('imported drafts', () => {
       { kind: 'ingredient', quantity: '', unit: null, name: 'syrup, to taste' },
     ]);
     expect(errorsFor(values)).toEqual({
-      description: 'Please enter a description',
       cookTime: 'Please enter the cook time',
     });
   });

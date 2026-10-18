@@ -1,84 +1,114 @@
 'use client';
 
 import { DragEvent, FormEvent, useRef, useState } from 'react';
-import { IconAlertCircle, IconLink, IconPhoto, IconUpload } from '@tabler/icons-react';
+import Link from 'next/link';
+import {
+  IconAlertCircle,
+  IconCheck,
+  IconCopy,
+  IconLink,
+  IconPhoto,
+  IconStack2,
+  IconUpload,
+} from '@tabler/icons-react';
 import {
   Alert,
+  Anchor,
   Button,
   FileInput,
   Group,
   Paper,
+  Stack,
+  Switch,
   Tabs,
   Text,
   TextInput,
   Title,
 } from '@mantine/core';
-import axios from '@/helpers/axios';
-import { endpoints } from '@/helpers/endpoints';
+import { recipePath, Routes } from '@/helpers/constants';
 import { getErrorMessage } from '@/helpers/errors';
-import { ImportResponse } from '@/types/recipe';
-
-// The API's limits for photos
-export const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+import {
+  checkImage,
+  IMAGE_TYPES,
+  ImportJob,
+  MAX_IMAGES_PER_RECIPE,
+  sendImport,
+  toImportUrl,
+} from '@/helpers/imports';
+import { ImportDraft, ImportResult } from '@/types/recipe';
 
 export type ImportSource = 'url' | 'image';
-export type ImportResult = ImportResponse['data'];
 
-// A full web address. Typing "example.com/pancakes" is common, so https:// is added if it's
-// missing. Null if it still isn't an http(s) address
-export const toImportUrl = (text: string) => {
-  const trimmed = text.trim();
-  if (!trimmed) {
-    return null;
-  }
-  const withScheme = /^[a-z][a-z\d+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  try {
-    const url = new URL(withScheme);
-    return ['http:', 'https:'].includes(url.protocol) && url.hostname.includes('.')
-      ? url.toString()
-      : null;
-  } catch {
-    return null;
-  }
-};
-
-// Why a photo can't be used, before uploading it, or null if it's fine
-export const checkImage = (file: File) => {
-  if (!IMAGE_TYPES.includes(file.type)) {
-    return 'Please choose a JPEG, PNG, GIF or WebP image.';
-  }
-  if (file.size > MAX_IMAGE_BYTES) {
-    return 'That image is too big. Please use one under 5 MB.';
-  }
-  return null;
-};
+// An import with a draft to check in the form
+export type ImportedDraft = { draft: ImportDraft; issues: ImportResult['issues'] };
 
 type ImportRecipeProps = {
   // Chosen from My Recipes' import menu. The address box takes focus for a website
   initialSource?: ImportSource;
-  onImport: (result: ImportResult) => void;
+  // A draft to check in the form. `triedToSkip` is true when it was meant to be created straight
+  // away, but came back because something needs fixing
+  onImport: (result: ImportedDraft, options: { triedToSkip: boolean }) => void;
+  // "Create it straight away". Held by the page, which hides the form while it's on
+  skipReview: boolean;
+  onSkipReviewChange: (skipReview: boolean) => void;
 };
 
-// Reads a recipe from a web page or a photo into a draft for the form below. Nothing is saved:
-// the user checks the draft and creates the recipe as usual
-export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
+// Why these photos can't be read as one recipe, or null if they can
+const checkPhotos = (photos: File[]) => {
+  if (photos.length === 0) {
+    return 'Please choose a photo of a recipe.';
+  }
+  if (photos.length > MAX_IMAGES_PER_RECIPE) {
+    return `A recipe can be read from up to ${MAX_IMAGES_PER_RECIPE} photos. For more recipes, use bulk import.`;
+  }
+  return photos.map(checkImage).find(Boolean) ?? null;
+};
+
+// Reads a recipe from a web page, or from up to 4 photos of one recipe. By default it's a draft
+// for the user to check in the form below. With "Create it straight away" on, a draft with
+// nothing to fix is created instead, and the panel is ready for the next import
+export function ImportRecipe({
+  initialSource,
+  onImport,
+  skipReview,
+  onSkipReviewChange,
+}: ImportRecipeProps) {
   const [source, setSource] = useState<ImportSource>(initialSource ?? 'url');
   const [url, setUrl] = useState('');
-  const [image, setImage] = useState<File | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [created, setCreated] = useState<{ id: string; title: string } | null>(null);
+  // Already in the user's book. Kept with the import, so it can be sent again anyway
+  const [duplicate, setDuplicate] = useState<{
+    of: { id: string; title: string };
+    job: ImportJob;
+  } | null>(null);
   const [dragging, setDragging] = useState(false);
   const request = useRef<AbortController | null>(null);
 
-  const run = async (send: (signal: AbortSignal) => Promise<{ data: ImportResponse }>) => {
+  const run = async (job: ImportJob, { allowDuplicate = false } = {}) => {
     const controller = new AbortController();
     request.current = controller;
     setImporting(true);
     setError(null);
+    setCreated(null);
+    setDuplicate(null);
     try {
-      const res = await send(controller.signal);
-      onImport(res.data.data);
+      const result = await sendImport(job, {
+        skipReview,
+        allowDuplicate,
+        signal: controller.signal,
+      });
+      if (result.recipe) {
+        setCreated(result.recipe);
+        setUrl('');
+        setPhotos([]);
+      } else if (result.duplicateOf) {
+        setDuplicate({ of: result.duplicateOf, job });
+      } else if (result.draft) {
+        onImport({ draft: result.draft, issues: result.issues }, { triedToSkip: skipReview });
+      }
     } catch (err) {
       if (!controller.signal.aborted) {
         setError(getErrorMessage(err));
@@ -98,31 +128,17 @@ export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
       setError('Please enter the web address of a recipe, like https://example.com/pancakes.');
       return;
     }
-    run((signal) =>
-      axios.post<ImportResponse>(endpoints.recipes.importUrl, { url: full }, { signal })
-    );
+    run({ kind: 'url', url: full });
   };
 
-  const importImage = (event: FormEvent) => {
+  const importPhotos = (event: FormEvent) => {
     event.preventDefault();
-    if (!image) {
-      setError('Please choose a photo of a recipe.');
-      return;
-    }
-    const problem = checkImage(image);
+    const problem = checkPhotos(photos);
     if (problem) {
       setError(problem);
       return;
     }
-    const form = new FormData();
-    form.append('image', image);
-    run((signal) =>
-      axios.post<ImportResponse>(endpoints.recipes.importImage, form, {
-        // The shared instance sends JSON, which would turn the form data into JSON too
-        headers: { 'Content-Type': 'multipart/form-data' },
-        signal,
-      })
-    );
+    run({ kind: 'image', files: photos });
   };
 
   const cancel = () => {
@@ -131,19 +147,20 @@ export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
     setImporting(false);
   };
 
-  const chooseImage = (file: File | null) => {
-    setImage(file);
-    setError(file && checkImage(file));
+  // In the order chosen, which is the page order
+  const choosePhotos = (files: File[]) => {
+    setPhotos(files);
+    setError(files.length ? checkPhotos(files) : null);
   };
 
-  // A photo can be dropped anywhere on the panel
+  // Photos can be dropped anywhere on the panel
   const handleDrop = (event: DragEvent) => {
     event.preventDefault();
     setDragging(false);
-    const file = event.dataTransfer.files[0];
-    if (file && !importing) {
+    const files = Array.from(event.dataTransfer.files);
+    if (files.length && !importing) {
       setSource('image');
-      chooseImage(file);
+      choosePhotos(files);
     }
   };
 
@@ -163,12 +180,21 @@ export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
         borderColor: dragging ? 'var(--mantine-color-orange-6)' : undefined,
       }}
     >
-      <Title order={2} size="h4">
-        Import a recipe
-      </Title>
+      <Group justify="space-between" align="flex-start" gap="xs">
+        <Title order={2} size="h4">
+          Import a recipe
+        </Title>
+        <Anchor component={Link} href={Routes.BULK_IMPORT} size="sm">
+          <Group gap={4} wrap="nowrap">
+            <IconStack2 size={16} aria-hidden />
+            Import lots at once
+          </Group>
+        </Anchor>
+      </Group>
       <Text size="sm" c="dimmed" mb="sm">
-        Fill in the form from a website or a photo of a recipe. You can check and change everything
-        before you create it.
+        {skipReview
+          ? 'Add recipes from websites or photos one after another. Any that need fixing open for you to check.'
+          : 'Fill in the form from a website or photos of a recipe. You can check and change everything before you create it.'}
       </Text>
 
       <Tabs
@@ -181,7 +207,7 @@ export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
             From a website
           </Tabs.Tab>
           <Tabs.Tab value="image" leftSection={<IconPhoto size={16} />} disabled={importing}>
-            From a photo
+            From photos
           </Tabs.Tab>
         </Tabs.List>
 
@@ -205,18 +231,19 @@ export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
         </Tabs.Panel>
 
         <Tabs.Panel value="image" pt="md">
-          <form onSubmit={importImage} noValidate>
+          <form onSubmit={importPhotos} noValidate>
             <Group align="flex-end" gap="sm">
               <FileInput
-                label="Photo of a recipe"
-                description="JPEG, PNG, GIF or WebP, up to 5 MB. You can also drop it here."
-                placeholder="Choose a photo"
+                multiple
+                label="Photos of one recipe"
+                description={`Up to ${MAX_IMAGES_PER_RECIPE} pages, chosen in page order. JPEG, PNG, GIF or WebP, up to 5 MB each. You can also drop them here.`}
+                placeholder="Choose photos"
                 accept={IMAGE_TYPES.join(',')}
                 leftSection={<IconUpload size={16} />}
                 clearable
                 style={{ flex: 1, minWidth: 220 }}
-                value={image}
-                onChange={chooseImage}
+                value={photos}
+                onChange={choosePhotos}
                 disabled={importing}
               />
               <ImportButton importing={importing} onCancel={cancel} />
@@ -224,6 +251,15 @@ export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
           </form>
         </Tabs.Panel>
       </Tabs>
+
+      <Switch
+        mt="md"
+        label="Create it straight away"
+        description="Skip checking it in the form. If anything needs fixing, it opens in the form instead."
+        checked={skipReview}
+        onChange={(event) => onSkipReviewChange(event.currentTarget.checked)}
+        disabled={importing}
+      />
 
       {importing && (
         <Text size="sm" c="dimmed" mt="sm" role="status">
@@ -233,6 +269,38 @@ export function ImportRecipe({ initialSource, onImport }: ImportRecipeProps) {
       {error && (
         <Alert color="red" icon={<IconAlertCircle />} mt="sm">
           {error}
+        </Alert>
+      )}
+      {created && (
+        <Alert color="green" icon={<IconCheck />} mt="sm">
+          Created{' '}
+          <Anchor component={Link} href={recipePath(created.id)} fw={600} size="sm">
+            {created.title}
+          </Anchor>
+          . You can import another one now.
+        </Alert>
+      )}
+      {duplicate && (
+        <Alert color="blue" icon={<IconCopy />} mt="sm" title="Already in your book">
+          <Stack gap="xs">
+            <Text size="sm">
+              You already have{' '}
+              <Anchor component={Link} href={recipePath(duplicate.of.id)} fw={600} size="sm">
+                {duplicate.of.title}
+              </Anchor>{' '}
+              from {duplicate.job.kind === 'url' ? 'this page' : 'these photos'}, so nothing was
+              imported.
+            </Text>
+            <Group>
+              <Button
+                variant="default"
+                size="compact-sm"
+                onClick={() => run(duplicate.job, { allowDuplicate: true })}
+              >
+                Import anyway
+              </Button>
+            </Group>
+          </Stack>
         </Alert>
       )}
     </Paper>

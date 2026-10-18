@@ -233,6 +233,19 @@ describe('Recipe page', () => {
     expect(screen.queryByText(/includes your personal changes/)).not.toBeInTheDocument();
   });
 
+  it.each([
+    ['null', null],
+    ['0', 0],
+  ])('hides the prep time when it is %s, and totals the cook time alone', async (_, prepTime) => {
+    respond({ prepTime, cookTime: 80 });
+    await renderPage();
+
+    expect(screen.queryByText('Prep')).not.toBeInTheDocument();
+    expect(screen.getByText('Cook')).toBeVisible();
+    // Cook and total are both 1hr 20mins
+    expect(screen.getAllByText('1hr 20mins')).toHaveLength(2);
+  });
+
   it('credits the site an imported recipe came from', async () => {
     respond({ sourceUrl: 'https://www.example.com/pasta' });
     await renderPage();
@@ -249,7 +262,7 @@ describe('Recipe page', () => {
   ])('shows no credit for %s', async (_, sourceUrl) => {
     respond({ sourceUrl });
     await renderPage();
-    expect(screen.queryByText(/Imported from/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^From/)).not.toBeInTheDocument();
   });
 
   it('shows ingredients with no amount, and counts with no unit', async () => {

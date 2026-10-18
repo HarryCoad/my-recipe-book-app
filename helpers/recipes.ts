@@ -1,5 +1,9 @@
 import { Ingredient, Recipe } from '@/types/recipe';
 
+// Prep plus cook time in minutes. Recipes with no prep have a prep time of 0 or null
+export const totalTime = ({ prepTime, cookTime }: Pick<Recipe, 'prepTime' | 'cookTime'>) =>
+  (prepTime ?? 0) + cookTime;
+
 // The site an imported recipe came from, e.g. "bbcgoodfood.com", for attribution. Null unless it's
 // an http(s) address, so it's safe to link to
 export const sourceHost = (url: string | null | undefined) => {

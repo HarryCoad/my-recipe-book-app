@@ -70,7 +70,8 @@ export function RecipeCard({ recipe, href, isOwn, action }: RecipeCardProps) {
         <Container mt={10} w="100%" p={0}>
           <div className={styles.floatRight}>
             <Flex gap={5} align="center">
-              {recipe.prepTime > 0 && (
+              {/* 0 or null when there's no prep */}
+              {!!recipe.prepTime && (
                 <span className={styles.iconInfo} title="Prep Time">
                   <IconSlice stroke={1.5} size={15} /> {recipe.prepTime}
                 </span>

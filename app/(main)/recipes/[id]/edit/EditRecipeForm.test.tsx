@@ -61,14 +61,24 @@ describe('Edit recipe form', () => {
     expect(screen.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/recipes/r1');
   });
 
-  it('asks for a description when an older recipe has none', async () => {
-    render(<EditRecipeForm recipe={{ ...recipe, description: null }} />);
-    expect(screen.getByLabelText(/^Description/)).toHaveValue('');
+  it('saves a recipe without a description, sending it empty so the API clears it', async () => {
+    patch.mockResolvedValue({ data: { status: 1, data: { recipe } } });
+    render(<EditRecipeForm recipe={recipe} />);
 
+    await userEvent.clear(screen.getByLabelText(/^Description/));
     await submit();
 
-    expect(await screen.findByText('Please enter a description')).toBeVisible();
-    expect(patch).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(patch).toHaveBeenCalledWith(
+        '/api/v1/recipes/update-own-recipe',
+        expect.objectContaining({ id: 'r1', description: '' })
+      )
+    );
+  });
+
+  it('shows a recipe that has no description with the field empty', () => {
+    render(<EditRecipeForm recipe={{ ...recipe, description: null }} />);
+    expect(screen.getByLabelText(/^Description/)).toHaveValue('');
   });
 
   it('saves the changes and goes back to the recipe', async () => {

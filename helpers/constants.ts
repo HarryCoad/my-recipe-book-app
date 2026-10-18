@@ -9,6 +9,7 @@ export enum Routes {
   HOME = '/', // Dashboard
   MY_RECIPES = '/my-recipes',
   NEW_RECIPE = '/my-recipes/new',
+  BULK_IMPORT = '/my-recipes/import',
   RECIPES = '/recipes',
   MY_SUGGESTIONS = '/suggestions',
   USERS = '/users',

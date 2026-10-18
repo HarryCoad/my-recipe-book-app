@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconFileImport } from '@tabler/icons-react';
 import { Alert, Anchor, Button, Group, Stack, Text } from '@mantine/core';
+import { useLocalStorage } from '@mantine/hooks';
 import { RecipeForm } from '@/components/RecipeForm/RecipeForm';
 import { draftToFormValues, RecipeFormValues } from '@/components/RecipeForm/recipeFormSchema';
 import axios from '@/helpers/axios';
@@ -11,11 +12,13 @@ import { recipePath, Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
 import { sourceHost } from '@/helpers/recipes';
 import { CreateRecipeBody, CreateRecipeResponse } from '@/types/recipe';
-import { ImportRecipe, ImportResult, ImportSource } from './ImportRecipe';
+import { ImportedDraft, ImportRecipe, ImportSource } from './ImportRecipe';
 
 type Imported = {
   values: RecipeFormValues;
   needsChecking: boolean;
+  // Meant to be created straight away, but something needs fixing first
+  triedToSkip: boolean;
   // Each import starts the form afresh
   id: number;
 };
@@ -23,6 +26,13 @@ type Imported = {
 export function CreateRecipeForm({ importFrom }: { importFrom?: ImportSource }) {
   const router = useRouter();
   const [imported, setImported] = useState<Imported | null>(null);
+  // "Create it straight away", for importing lots of recipes in a row, so it's remembered in this
+  // browser. While it's on, the form only shows for an import that needs fixing
+  const [skipReview, setSkipReview] = useLocalStorage({
+    key: 'import-skip-review',
+    defaultValue: false,
+  });
+  const showForm = !skipReview || imported !== null;
 
   // Errors are shown by RecipeForm. The API answers failures with an error status, so axios throws
   const handleSubmit = async (body: CreateRecipeBody) => {
@@ -32,10 +42,14 @@ export function CreateRecipeForm({ importFrom }: { importFrom?: ImportSource }) 
   };
 
   // Replaces anything already typed into the form
-  const handleImport = ({ draft, issues }: ImportResult) =>
+  const handleImport = (
+    { draft, issues }: ImportedDraft,
+    { triedToSkip }: { triedToSkip: boolean }
+  ) =>
     setImported((previous) => ({
       values: draftToFormValues(draft),
       needsChecking: issues.length > 0,
+      triedToSkip,
       id: (previous?.id ?? 0) + 1,
     }));
 
@@ -62,7 +76,7 @@ export function CreateRecipeForm({ importFrom }: { importFrom?: ImportSource }) 
               )}
               .{' '}
               {imported.needsChecking
-                ? "Some details are missing or need choosing: they're highlighted below."
+                ? `${imported.triedToSkip ? "It wasn't created straight away, because some" : 'Some'} details are missing or need choosing: they're highlighted below.`
                 : 'Check it over, then create it.'}{' '}
               It's set to private, since it's usually someone else's recipe.
             </Text>
@@ -74,18 +88,25 @@ export function CreateRecipeForm({ importFrom }: { importFrom?: ImportSource }) 
           </Stack>
         </Alert>
       ) : (
-        <ImportRecipe initialSource={importFrom} onImport={handleImport} />
+        <ImportRecipe
+          initialSource={importFrom}
+          onImport={handleImport}
+          skipReview={skipReview}
+          onSkipReviewChange={setSkipReview}
+        />
       )}
 
-      <RecipeForm
-        key={imported?.id ?? 'blank'}
-        initialValues={imported?.values}
-        highlightErrors={!!imported}
-        mergeableSteps={!!imported}
-        submitLabel="Create recipe"
-        cancelHref={Routes.MY_RECIPES}
-        onSubmit={handleSubmit}
-      />
+      {showForm && (
+        <RecipeForm
+          key={imported?.id ?? 'blank'}
+          initialValues={imported?.values}
+          highlightErrors={!!imported}
+          mergeableSteps={!!imported}
+          submitLabel="Create recipe"
+          cancelHref={Routes.MY_RECIPES}
+          onSubmit={handleSubmit}
+        />
+      )}
     </Stack>
   );
 }

@@ -40,7 +40,7 @@ import {
   userPath,
 } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
-import { canSuggest, sourceHost } from '@/helpers/recipes';
+import { canSuggest, sourceHost, totalTime } from '@/helpers/recipes';
 import { getSession } from '@/helpers/serverApi';
 import { DeleteRecipeButton } from './DeleteRecipeButton';
 import { getRecipe } from './getRecipe';
@@ -220,7 +220,7 @@ export default async function RecipePage(props: PageProps) {
       {/* Credit for an imported recipe. Only linked when it's an http(s) address */}
       {sourceHost(recipe.sourceUrl) && (
         <Text size="sm" c="dimmed" ta="center" mt="xs">
-          Imported from{' '}
+          From{' '}
           <Anchor
             href={recipe.sourceUrl!}
             target="_blank"
@@ -234,14 +234,17 @@ export default async function RecipePage(props: PageProps) {
       )}
 
       <Group justify="center" gap="xl" mt="lg">
-        <Stat icon={<IconSlice size={18} />} label="Prep">
-          {convertMinutesToHoursAndMinutes(recipe.prepTime)}
-        </Stat>
+        {/* Recipes with no prep, such as a salad, have none to show */}
+        {!!recipe.prepTime && (
+          <Stat icon={<IconSlice size={18} />} label="Prep">
+            {convertMinutesToHoursAndMinutes(recipe.prepTime)}
+          </Stat>
+        )}
         <Stat icon={<IconFlame size={18} />} label="Cook">
           {convertMinutesToHoursAndMinutes(recipe.cookTime)}
         </Stat>
         <Stat icon={<IconClock size={18} />} label="Total">
-          {convertMinutesToHoursAndMinutes(recipe.prepTime + recipe.cookTime)}
+          {convertMinutesToHoursAndMinutes(totalTime(recipe))}
         </Stat>
         <Stat icon={<IconUsers size={18} />} label="Serves">
           {recipe.serves}

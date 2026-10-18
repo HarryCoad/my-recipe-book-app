@@ -9,11 +9,12 @@ export interface Recipe {
   bPrivate: boolean;
   bAllowSuggestions: boolean;
   title: string;
-  // Null for older recipes saved without one. New and updated recipes must have one
+  // Optional, so null when the recipe has none
   description: string | null;
   category: string;
   serves: number;
-  prepTime: number;
+  // 0 or null when there's no prep, such as a salad
+  prepTime: number | null;
   cookTime: number;
   ingredients: Ingredient[];
   steps: string[];
@@ -87,10 +88,12 @@ export type Unit = (typeof UNITS)[number];
 // POST /recipes/create. Optional fields fall back to the API's defaults
 export type CreateRecipeBody = {
   title: string;
-  description: string;
+  // Optional. Empty is stored as null, and clears it when updating a recipe
+  description?: string;
   category: RecipeCategory;
   serves: number;
-  prepTime: number;
+  // Optional: 0 or null means no prep
+  prepTime?: number | null;
   cookTime: number;
   ingredients: {
     quantity: number | null;
@@ -104,6 +107,9 @@ export type CreateRecipeBody = {
   bAllowSuggestions?: boolean;
   // Where an imported recipe came from. Must be an http(s) URL
   sourceUrl?: string | null;
+  // From a photo import's draft, so the photos are recognised if imported again. Create only:
+  // update-own-recipe refuses it
+  sourceImageHash?: string | null;
 };
 
 export type CreateRecipeResponse = APIResponse<{ recipe: Recipe }>;
@@ -117,6 +123,7 @@ export type ImportDraft = {
   description: string | null;
   category: string;
   serves: number;
+  // 0 when the source gave none
   prepTime: number;
   cookTime: number;
   ingredients: {
@@ -130,11 +137,22 @@ export type ImportDraft = {
   bPrivate: boolean;
   // The page it came from, after redirects. Null for a photo
   sourceUrl: string | null;
+  // Identifies a photo import's images, so importing them again is spotted as a duplicate. Send
+  // it back unchanged when creating the recipe from the draft. Never shown
+  sourceImageHash?: string | null;
 };
-export type ImportResponse = APIResponse<{
-  draft: ImportDraft;
+export type ImportResult = {
+  // Null when it's a duplicate
+  draft: ImportDraft | null;
   issues: { fieldname: string; code: string }[];
-}>;
+  // With bSkipReview, the recipe created straight away. Null otherwise, including when the
+  // draft had issues, so it came back for review instead
+  recipe: Recipe | null;
+  // The recipe already in the user's book from the same page or photos. Nothing was read or
+  // created. Send bAllowDuplicate to import it anyway
+  duplicateOf: { id: string; title: string } | null;
+};
+export type ImportResponse = APIResponse<ImportResult>;
 
 // PATCH /recipes/update-own-recipe: author only. Fields left out stay as they are
 export type UpdateOwnRecipeBody = { id: string } & Partial<CreateRecipeBody>;

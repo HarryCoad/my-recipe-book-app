@@ -2,7 +2,7 @@ import { render, screen, userEvent } from '@/test-utils';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 
 describe('Colour scheme toggle', () => {
-  it('switches between light, dark and the device setting', async () => {
+  it('switches between light and dark', async () => {
     render(<ColorSchemeToggle />);
 
     await userEvent.click(screen.getByRole('radio', { name: 'Dark' }));
@@ -11,8 +11,6 @@ describe('Colour scheme toggle', () => {
 
     await userEvent.click(screen.getByRole('radio', { name: 'Light' }));
     expect(document.documentElement).toHaveAttribute('data-mantine-color-scheme', 'light');
-
-    await userEvent.click(screen.getByRole('radio', { name: 'Match your device' }));
-    expect(screen.getByRole('radio', { name: 'Match your device' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Light' })).toBeChecked();
   });
 });

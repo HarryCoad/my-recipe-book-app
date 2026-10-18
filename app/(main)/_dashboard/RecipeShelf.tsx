@@ -5,6 +5,7 @@ import { SaveRecipeButton } from '@/components/SaveRecipeButton/SaveRecipeButton
 import { UserLink } from '@/components/UserLink/UserLink';
 import { recipePath } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
+import { totalTime } from '@/helpers/recipes';
 import { RecipeSearchResult } from '@/types/recipe';
 import { loadSection, searchRecipes } from './data';
 import { SectionError } from './SectionError';
@@ -67,9 +68,7 @@ function ShelfCard({ recipe }: { recipe: RecipeSearchResult }) {
             </Badge>
             <Group gap={4} c="dimmed">
               <IconClock size={14} aria-hidden />
-              <Text size="xs">
-                {convertMinutesToHoursAndMinutes(recipe.prepTime + recipe.cookTime)}
-              </Text>
+              <Text size="xs">{convertMinutesToHoursAndMinutes(totalTime(recipe))}</Text>
             </Group>
             <Group gap={4} c="dimmed">
               <IconUsers size={14} aria-hidden />

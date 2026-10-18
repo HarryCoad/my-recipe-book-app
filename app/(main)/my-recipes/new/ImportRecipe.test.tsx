@@ -1,8 +1,9 @@
+import { ComponentProps, useState } from 'react';
 import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
 import axios from '@/helpers/axios';
 import { render, screen, userEvent, waitFor } from '@/test-utils';
 import { ImportDraft } from '@/types/recipe';
-import { checkImage, ImportRecipe, toImportUrl } from './ImportRecipe';
+import { ImportRecipe as ImportPanel } from './ImportRecipe';
 
 jest.mock('@/helpers/axios', () => ({
   __esModule: true,
@@ -12,7 +13,10 @@ jest.mock('@/helpers/axios', () => ({
 const post = axios.post as jest.Mock;
 
 const draft = { title: 'Pancakes' } as ImportDraft;
-const imported = { data: { status: 1, data: { draft, issues: [] } } };
+const result = { draft, issues: [], recipe: null, duplicateOf: null };
+// Overrides of the API's answer, e.g. a created recipe or a duplicate
+const respond = (data: Record<string, unknown> = {}) =>
+  post.mockResolvedValue({ data: { status: 1, data: { ...result, ...data } } });
 
 const apiError = (status: number, message: string) =>
   new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
@@ -23,8 +27,8 @@ const apiError = (status: number, message: string) =>
     config: { headers: new AxiosHeaders() },
   } as AxiosResponse);
 
-const photo = (type = 'image/jpeg', size = 1000) => {
-  const file = new File(['x'], 'recipe.jpg', { type });
+const photo = (name = 'recipe.jpg', { type = 'image/jpeg', size = 1000 } = {}) => {
+  const file = new File(['x'], name, { type });
   Object.defineProperty(file, 'size', { value: size });
   return file;
 };
@@ -32,11 +36,20 @@ const photo = (type = 'image/jpeg', size = 1000) => {
 // Mantine's FileInput opens a hidden file input
 const fileInput = () => document.querySelector('input[type="file"]') as HTMLInputElement;
 
+// The page holds "Create it straight away" and remembers it (tested with CreateRecipeForm), so
+// stand in for it here
+function ImportRecipe(
+  props: Omit<ComponentProps<typeof ImportPanel>, 'skipReview' | 'onSkipReviewChange'>
+) {
+  const [skipReview, setSkipReview] = useState(false);
+  return <ImportPanel {...props} skipReview={skipReview} onSkipReviewChange={setSkipReview} />;
+}
+
 describe('Import recipe', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('imports from a web address, adding https:// if it was left off', async () => {
-    post.mockResolvedValue(imported);
+    respond();
     const onImport = jest.fn();
     render(<ImportRecipe onImport={onImport} />);
 
@@ -45,7 +58,9 @@ describe('Import recipe', () => {
       'example.com/pancakes{Enter}'
     );
 
-    await waitFor(() => expect(onImport).toHaveBeenCalledWith({ draft, issues: [] }));
+    await waitFor(() =>
+      expect(onImport).toHaveBeenCalledWith({ draft, issues: [] }, { triedToSkip: false })
+    );
     expect(post).toHaveBeenCalledWith(
       '/api/v1/recipes/import-url',
       { url: 'https://example.com/pancakes' },
@@ -74,31 +89,127 @@ describe('Import recipe', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(message);
   });
 
-  it('imports from a photo, sent as a file upload', async () => {
-    post.mockResolvedValue(imported);
+  it('reads up to 4 photos as one recipe, in the order chosen', async () => {
+    respond();
     const onImport = jest.fn();
     render(<ImportRecipe initialSource="image" onImport={onImport} />);
 
-    const file = photo();
-    await userEvent.upload(fileInput(), file);
+    const pages = [photo('page1.jpg'), photo('page2.jpg')];
+    await userEvent.upload(fileInput(), pages);
     await userEvent.click(screen.getByRole('button', { name: 'Import' }));
 
     await waitFor(() => expect(onImport).toHaveBeenCalled());
     const [url, body, config] = post.mock.calls[0];
     expect(url).toBe('/api/v1/recipes/import-image');
-    expect(body).toBeInstanceOf(FormData);
-    expect((body as FormData).get('image')).toBe(file);
+    expect((body as FormData).getAll('image')).toEqual(pages);
     expect(config.headers).toEqual({ 'Content-Type': 'multipart/form-data' });
   });
 
-  it("won't send a photo the API would refuse", async () => {
+  it.each([
+    ['too big', [photo('big.jpg', { size: 6 * 1024 * 1024 })], 'too big'],
+    ['more than 4', ['1', '2', '3', '4', '5'].map((n) => photo(`${n}.jpg`)), 'up to 4 photos'],
+  ])("won't send photos the API would refuse: %s", async (_, files, message) => {
     render(<ImportRecipe initialSource="image" onImport={jest.fn()} />);
 
-    await userEvent.upload(fileInput(), photo('image/jpeg', 6 * 1024 * 1024));
-    expect(screen.getByRole('alert')).toHaveTextContent('too big');
+    await userEvent.upload(fileInput(), files);
+    expect(screen.getByRole('alert')).toHaveTextContent(message);
 
     await userEvent.click(screen.getByRole('button', { name: 'Import' }));
     expect(post).not.toHaveBeenCalled();
+  });
+
+  it('says when the recipe is already in the book, and can import it anyway', async () => {
+    respond({ draft: null, duplicateOf: { id: 'old', title: 'Old pancakes' } });
+    const onImport = jest.fn();
+    render(<ImportRecipe onImport={onImport} />);
+
+    await userEvent.type(screen.getByLabelText('Recipe web address'), 'https://a.com/x{Enter}');
+
+    expect(await screen.findByText('Already in your book')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Old pancakes' })).toHaveAttribute(
+      'href',
+      '/recipes/old'
+    );
+    expect(onImport).not.toHaveBeenCalled();
+
+    respond();
+    await userEvent.click(screen.getByRole('button', { name: 'Import anyway' }));
+
+    await waitFor(() => expect(onImport).toHaveBeenCalled());
+    expect(post).toHaveBeenLastCalledWith(
+      '/api/v1/recipes/import-url',
+      { url: 'https://a.com/x', bAllowDuplicate: true },
+      expect.anything()
+    );
+  });
+
+  it('links to bulk import for lots of recipes', () => {
+    render(<ImportRecipe onImport={jest.fn()} />);
+    expect(screen.getByRole('link', { name: 'Import lots at once' })).toHaveAttribute(
+      'href',
+      '/my-recipes/import'
+    );
+  });
+
+  describe('creating it straight away', () => {
+    const skipReview = () =>
+      userEvent.click(screen.getByRole('switch', { name: /Create it straight away/ }));
+    const createdRecipe = { id: 'r9', title: 'Pancakes' };
+
+    it('creates the recipe and gets ready for the next import', async () => {
+      respond({ recipe: createdRecipe });
+      const onImport = jest.fn();
+      render(<ImportRecipe onImport={onImport} />);
+
+      await skipReview();
+      const address = screen.getByLabelText('Recipe web address');
+      await userEvent.type(address, 'https://a.com/pancakes{Enter}');
+
+      expect(await screen.findByRole('link', { name: 'Pancakes' })).toHaveAttribute(
+        'href',
+        '/recipes/r9'
+      );
+      expect(screen.getByText(/You can import another one now/)).toBeVisible();
+      expect(post).toHaveBeenCalledWith(
+        '/api/v1/recipes/import-url',
+        { url: 'https://a.com/pancakes', bSkipReview: true },
+        expect.anything()
+      );
+      expect(address).toHaveValue('');
+      expect(onImport).not.toHaveBeenCalled();
+    });
+
+    it('sends the choice with photos too, as text', async () => {
+      respond({ recipe: createdRecipe });
+      render(<ImportRecipe initialSource="image" onImport={jest.fn()} />);
+
+      await skipReview();
+      await userEvent.upload(fileInput(), photo());
+      await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+
+      await screen.findByRole('link', { name: 'Pancakes' });
+      expect((post.mock.calls[0][1] as FormData).get('bSkipReview')).toBe('true');
+    });
+
+    it('opens the draft for review when something needs fixing', async () => {
+      const issues = [{ fieldname: 'cookTime', code: 'too_small' }];
+      respond({ issues });
+      const onImport = jest.fn();
+      render(<ImportRecipe onImport={onImport} />);
+
+      await skipReview();
+      await userEvent.type(screen.getByLabelText('Recipe web address'), 'https://a.com/x{Enter}');
+
+      await waitFor(() =>
+        expect(onImport).toHaveBeenCalledWith({ draft, issues }, { triedToSkip: true })
+      );
+    });
+
+    it('says what the panel does while it is on', async () => {
+      render(<ImportRecipe onImport={jest.fn()} />);
+      await skipReview();
+      expect(screen.getByText(/one after another/)).toBeVisible();
+    });
   });
 
   it('can be cancelled while it reads the recipe', async () => {
@@ -117,27 +228,5 @@ describe('Import recipe', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(onImport).not.toHaveBeenCalled();
-  });
-});
-
-describe('toImportUrl', () => {
-  it.each([
-    ['https://example.com/a', 'https://example.com/a'],
-    [' example.com/a ', 'https://example.com/a'],
-    ['http://example.com', 'http://example.com/'],
-    ['', null],
-    ['not a url', null],
-    ['ftp://example.com/a', null],
-    ['localhost', null],
-  ])('%p becomes %p', (text, url) => {
-    expect(toImportUrl(text)).toBe(url);
-  });
-});
-
-describe('checkImage', () => {
-  it('accepts the formats the API reads, up to 5 MB', () => {
-    expect(checkImage(photo('image/png', 5 * 1024 * 1024))).toBeNull();
-    expect(checkImage(photo('image/heic'))).toMatch(/JPEG, PNG, GIF or WebP/);
-    expect(checkImage(photo('image/webp', 5 * 1024 * 1024 + 1))).toMatch(/too big/);
   });
 });
