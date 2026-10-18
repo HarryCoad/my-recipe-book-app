@@ -4,18 +4,20 @@ import styles from './RecipeCard.module.scss';
 import {
   IconChevronRight,
   IconFlame,
+  IconMessage2,
   IconPizza,
   IconSlice,
   IconToolsKitchen3,
   IconUser,
 } from '@tabler/icons-react';
-import { Badge, Button, Container, Flex, Text } from '@mantine/core';
-import { Recipe } from '@/types/recipe';
+import { Badge, Button, Container, Flex, Text, Tooltip } from '@mantine/core';
+import { reviewSuggestionsPath } from '@/helpers/constants';
+import { RecipeSearchResult } from '@/types/recipe';
 
 const DESCRIPTION_LENGTH = 270;
 
 type RecipeCardProps = {
-  recipe: Recipe;
+  recipe: RecipeSearchResult;
   // Where "View Recipe" goes, e.g. `/recipes/<id>`
   href: string;
   // Shows a "Your recipe" badge, for lists that mix the user's recipes with other people's
@@ -26,6 +28,8 @@ type RecipeCardProps = {
 
 // No client code, so it renders on the server unless a client component uses it
 export function RecipeCard({ recipe, href, isOwn, action }: RecipeCardProps) {
+  const pending = recipe.pendingSuggestions;
+
   return (
     <article className={styles.card}>
       {/* Recipes don't have images yet, so show a placeholder */}
@@ -39,6 +43,22 @@ export function RecipeCard({ recipe, href, isOwn, action }: RecipeCardProps) {
         <Flex justify="space-between" gap={10} align="center" mt={10}>
           <Text size="xl">{recipe.title}</Text>
           <Flex gap={6} align="center">
+            {/* Only the author gets a count, and it goes straight to reviewing them */}
+            {pending > 0 && (
+              <Tooltip label="Review suggestions">
+                <Badge
+                  component={Link}
+                  href={reviewSuggestionsPath(recipe.id)}
+                  variant="filled"
+                  color="red"
+                  leftSection={<IconMessage2 size={12} />}
+                  style={{ cursor: 'pointer' }}
+                  aria-label={`${pending} ${pending === 1 ? 'suggestion' : 'suggestions'} waiting for review`}
+                >
+                  {pending}
+                </Badge>
+              </Tooltip>
+            )}
             {isOwn && (
               <Badge variant="light" color="blue" leftSection={<IconUser size={12} />}>
                 Your recipe

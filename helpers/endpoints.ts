@@ -9,6 +9,11 @@ export const endpoints = {
     updateOwn: '/api/v1/recipes/update-own-recipe',
     delete: '/api/v1/recipes/delete',
     toggleSave: '/api/v1/recipes/toggle-save',
+    // A personal edit, or a suggestion with isSuggestion
+    editRecipe: '/api/v1/recipes/edit-recipe',
+    viewSuggestions: (id: string) => `/api/v1/recipes/view-suggestions/${encodeURIComponent(id)}`,
+    reviewSuggestion: '/api/v1/recipes/review-suggestion',
+    mySuggestions: '/api/v1/recipes/my-suggestions',
     tags: '/api/v1/recipes/tags',
     view: (id: string) => `/api/v1/recipes/${encodeURIComponent(id)}`,
   },

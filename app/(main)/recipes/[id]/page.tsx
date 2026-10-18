@@ -8,11 +8,13 @@ import {
   IconInfoCircle,
   IconLock,
   IconMessage2,
+  IconMessagePlus,
   IconPencil,
   IconSlice,
   IconUser,
   IconUsers,
 } from '@tabler/icons-react';
+import { isAxiosError } from 'axios';
 import {
   ActionIcon,
   Alert,
@@ -22,6 +24,7 @@ import {
   Grid,
   GridCol,
   Group,
+  Indicator,
   Stack,
   Text,
   ThemeIcon,
@@ -30,11 +33,13 @@ import {
 } from '@mantine/core';
 import BackButton from '@/components/BackButton/BackButton';
 import { SaveRecipeButton } from '@/components/SaveRecipeButton/SaveRecipeButton';
-import { recipePath, Routes } from '@/helpers/constants';
+import { recipePath, reviewSuggestionsPath, Routes, suggestPath } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
+import { canSuggest } from '@/helpers/recipes';
 import { getSession } from '@/helpers/serverApi';
 import { DeleteRecipeButton } from './DeleteRecipeButton';
 import { getRecipe } from './getRecipe';
+import { getSuggestions } from './getSuggestions';
 import { IngredientsPanel } from './IngredientsPanel';
 
 type PageProps = {
@@ -64,6 +69,17 @@ export default async function RecipePage(props: PageProps) {
   const isAuthor = recipe.authorId === userId;
   // The author deleted it, but it's kept for the people who saved it
   const orphaned = recipe.authorName === null;
+  // Shown on the author's review button. The recipe still shows if they can't be loaded
+  const pendingSuggestions = isAuthor
+    ? await getSuggestions(recipe.id)
+        .then((suggestions) => suggestions.length)
+        .catch((err) => {
+          if (isAxiosError(err)) {
+            return 0;
+          }
+          throw err;
+        })
+    : 0;
 
   return (
     <Container size="lg" px={0} pb="xl">
@@ -71,7 +87,39 @@ export default async function RecipePage(props: PageProps) {
         <BackButton />
         <Title ta="center">{recipe.title}</Title>
         {!isAuthor && (
-          <Group justify="flex-end">
+          <Group justify="flex-end" gap="xs" wrap="nowrap">
+            {canSuggest(recipe, userId) ? (
+              <Tooltip label="Suggest changes">
+                <ActionIcon
+                  component={Link}
+                  href={suggestPath(recipe.id)}
+                  replace
+                  variant="light"
+                  color="orange"
+                  size="lg"
+                  aria-label="Suggest changes"
+                >
+                  <IconMessagePlus size={18} />
+                </ActionIcon>
+              </Tooltip>
+            ) : (
+              // Open to suggestions, but only from people who saved it
+              recipe.bAllowSuggestions &&
+              !orphaned && (
+                <Tooltip label="Save this recipe to suggest changes">
+                  <ActionIcon
+                    variant="light"
+                    color="orange"
+                    size="lg"
+                    aria-label="Suggest changes"
+                    aria-disabled
+                    data-disabled
+                  >
+                    <IconMessagePlus size={18} />
+                  </ActionIcon>
+                </Tooltip>
+              )
+            )}
             <SaveRecipeButton
               id={recipe.id}
               title={recipe.title}
@@ -83,6 +131,35 @@ export default async function RecipePage(props: PageProps) {
         )}
         {isAuthor && (
           <Group justify="flex-end" gap="xs" wrap="nowrap">
+            <Tooltip
+              label={
+                pendingSuggestions > 0
+                  ? `Review suggestions (${pendingSuggestions} waiting)`
+                  : 'Review suggestions'
+              }
+            >
+              <Indicator
+                label={pendingSuggestions}
+                disabled={pendingSuggestions === 0}
+                color="red"
+                size={16}
+              >
+                <ActionIcon
+                  component={Link}
+                  href={reviewSuggestionsPath(recipe.id)}
+                  variant="light"
+                  color="orange"
+                  size="lg"
+                  aria-label={
+                    pendingSuggestions > 0
+                      ? `Review suggestions, ${pendingSuggestions} waiting`
+                      : 'Review suggestions'
+                  }
+                >
+                  <IconMessage2 size={18} />
+                </ActionIcon>
+              </Indicator>
+            </Tooltip>
             <Tooltip label="Edit recipe">
               {/* Editing takes the recipe's place in the history, and saving or cancelling puts
                   it back, so the history never holds both */}

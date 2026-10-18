@@ -23,8 +23,12 @@ export interface Recipe {
   bDeleted: boolean;
 }
 
+// A recipe in search results. pendingSuggestions is how many suggestions are waiting for the
+// author to review, and is always 0 on other people's recipes
+export type RecipeSearchResult = Recipe & { pendingSuggestions: number };
+
 // GET /recipes/search: `data` is the list itself, not `data.recipes`
-export type RecipeSearchResponse = APIResponse<Recipe[]> & {
+export type RecipeSearchResponse = APIResponse<RecipeSearchResult[]> & {
   results: number;
   totalPages: number;
   currentPage: number;
@@ -90,6 +94,47 @@ export type UpdateOwnRecipeResponse = APIResponse<{ recipe: Recipe }>;
 
 // POST /recipes/delete: author only. Responds with `data: null`
 export type DeleteRecipeBody = { id: string };
+
+// A personal edit or a suggestion. Parts that weren't changed are left as they are: empty
+// ingredients or steps, and missing tags ([] means every tag was removed)
+export type EditStatus = 'pending' | 'accepted' | 'rejected';
+export interface Edit {
+  id: string;
+  recipeId: string;
+  userId: string;
+  // Who made it. Null if their account was deleted
+  userName: string | null;
+  isSuggestion: boolean;
+  ingredients: Omit<Ingredient, 'id'>[];
+  steps: string[];
+  tags?: string[];
+  comments?: string;
+  status: EditStatus;
+}
+
+// POST /recipes/edit-recipe, as a suggestion. Leave out the parts that weren't changed
+export type SuggestChangesBody = {
+  id: string;
+  isSuggestion: true;
+  ingredients?: CreateRecipeBody['ingredients'];
+  steps?: string[];
+  tags?: string[];
+  comments?: string;
+};
+
+// GET /recipes/view-suggestions/:id: author only, newest first
+export type ViewSuggestionsResponse = APIResponse<{ edits: Edit[] }>;
+
+// POST /recipes/review-suggestion: author only
+export type ReviewSuggestionBody = { id: string; bAccept: boolean };
+
+// GET /recipes/my-suggestions: newest first. The recipe is null if it was deleted
+export type MySuggestion = Omit<Edit, 'recipeId'> & {
+  recipeId: { id: string; title: string } | null;
+};
+export type MySuggestionsResponse = APIResponse<{ suggestions: MySuggestion[] }> & {
+  results: number;
+};
 
 // POST /recipes/toggle-save. Responds with `data: null`. Unsaving a recipe the user has a personal
 // edit on fails with CONFIRM_LOSE_EDITS until it's resent with bConfirmLoseEdits

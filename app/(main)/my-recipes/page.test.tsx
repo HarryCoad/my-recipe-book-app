@@ -1,7 +1,7 @@
 import recipes from '@/devData/recipes.json';
 import { serverGet } from '@/helpers/serverApi';
 import { render, screen } from '@/test-utils';
-import { Recipe } from '@/types/recipe';
+import { RecipeSearchResult } from '@/types/recipe';
 import MyRecipes from './page';
 
 jest.mock('@/helpers/serverApi', () => ({
@@ -17,9 +17,12 @@ jest.mock('next/navigation', () => ({
 }));
 const get = serverGet as jest.Mock;
 
-const [first, second] = recipes as Recipe[];
+// Search results, which also say how many suggestions are waiting
+const [first, second] = (recipes as Omit<RecipeSearchResult, 'pendingSuggestions'>[]).map(
+  (recipe) => ({ ...recipe, pendingSuggestions: 0 })
+);
 
-const searchResponse = (data: Recipe[], totalPages = 1) => ({
+const searchResponse = (data: RecipeSearchResult[], totalPages = 1) => ({
   status: 1,
   results: data.length,
   totalPages,
@@ -47,6 +50,22 @@ describe('My recipes page', () => {
     expect(get).toHaveBeenCalledWith('/api/v1/recipes/search', {
       params: { authorId: 'me', page: 1 },
     });
+  });
+
+  it('flags recipes with suggestions waiting for review', async () => {
+    get.mockResolvedValue(
+      searchResponse([
+        { ...first, pendingSuggestions: 2 },
+        { ...second, pendingSuggestions: 0 },
+      ])
+    );
+    await renderPage();
+
+    expect(screen.getByRole('link', { name: '2 suggestions waiting for review' })).toHaveAttribute(
+      'href',
+      `/recipes/${first.id}/suggestions`
+    );
+    expect(screen.getAllByRole('link', { name: /waiting for review/ })).toHaveLength(1);
   });
 
   it('requests the page from the URL and shows pagination', async () => {

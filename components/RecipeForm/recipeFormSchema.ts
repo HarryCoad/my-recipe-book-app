@@ -1,7 +1,14 @@
 import { withZodSchema } from 'formik-validator-zod';
 import { z, ZodSchema } from 'zod';
 import { MAX_TAG_LENGTH, MAX_TAGS, normaliseTags } from '@/helpers/tags';
-import { CreateRecipeBody, Recipe, RECIPE_CATEGORIES, UNITS } from '@/types/recipe';
+import {
+  CreateRecipeBody,
+  Ingredient,
+  Recipe,
+  RECIPE_CATEGORIES,
+  SuggestChangesBody,
+  UNITS,
+} from '@/types/recipe';
 import {
   groupRange,
   IngredientListRow,
@@ -25,6 +32,9 @@ export type RecipeFormValues = {
   bPrivate: boolean;
   bAllowSuggestions: boolean;
 };
+
+// The parts IngredientList and StepList edit, so forms other than the full recipe can use them
+export type RecipeContentValues = Pick<RecipeFormValues, 'ingredients' | 'steps'>;
 
 // Fixed keys, so the server-rendered form matches the browser's
 export const emptyRecipe: RecipeFormValues = {
@@ -146,6 +156,15 @@ const stepsSchema = z
   .transform((steps) => steps.map((step) => step.text.trim()).filter(Boolean))
   .refine((steps) => steps.length > 0, 'Please add at least one step');
 
+const tagsSchema = z
+  .array(z.string())
+  .transform(normaliseTags)
+  .refine((tags) => tags.length <= MAX_TAGS, `Please use at most ${MAX_TAGS} tags`)
+  .refine(
+    (tags) => tags.every((tag) => tag.length <= MAX_TAG_LENGTH),
+    `Tags can be at most ${MAX_TAG_LENGTH} characters`
+  );
+
 // Mirrors the API's RecipeSchema (utils/recipeUtils.ts in the backend), plus a form-only rule
 // that a recipe needs at least one ingredient and one step
 export const recipeFormSchema = z.object({
@@ -157,14 +176,7 @@ export const recipeFormSchema = z.object({
   cookTime: positiveNumber('Please enter the cook time', { integer: true }),
   ingredients: ingredientsSchema,
   steps: stepsSchema,
-  tags: z
-    .array(z.string())
-    .transform(normaliseTags)
-    .refine((tags) => tags.length <= MAX_TAGS, `Please use at most ${MAX_TAGS} tags`)
-    .refine(
-      (tags) => tags.every((tag) => tag.length <= MAX_TAG_LENGTH),
-      `Tags can be at most ${MAX_TAG_LENGTH} characters`
-    ),
+  tags: tagsSchema,
   bPrivate: z.boolean(),
   bAllowSuggestions: z.boolean(),
 });
@@ -179,9 +191,60 @@ export const validateRecipeForm = withZodSchema(
 export const toRecipeBody = (values: RecipeFormValues): CreateRecipeBody =>
   recipeFormSchema.parse(values);
 
+// Suggesting changes to someone else's recipe: its ingredients, steps and tags, and a message
+export type SuggestionFormValues = RecipeContentValues & { tags: string[]; comments: string };
+
+export const suggestionToFormValues = (recipe: Recipe): SuggestionFormValues => {
+  const { ingredients, steps, tags } = recipeToFormValues(recipe);
+  return { ingredients, steps, tags, comments: '' };
+};
+
+const suggestionFormSchema = z.object({
+  ingredients: ingredientsSchema,
+  steps: stepsSchema,
+  tags: tagsSchema,
+  comments: z.string().trim(),
+});
+
+export const validateSuggestionForm = withZodSchema(
+  suggestionFormSchema as unknown as ZodSchema<SuggestionFormValues>
+);
+
+// Ingredients as the API compares them, ignoring ids and spacing in headings
+const comparable = (ingredients: CreateRecipeBody['ingredients'] | Ingredient[]) =>
+  JSON.stringify(
+    ingredients.map(({ quantity, unit, name, subheader }) => ({
+      quantity,
+      unit,
+      name: name.trim(),
+      subheader: subheader?.trim() || null,
+    }))
+  );
+const sameList = (a: string[], b: string[]) => JSON.stringify(a) === JSON.stringify(b);
+
+// Only the parts that differ from the recipe, because the API leaves out parts as "not changed".
+// Accepting a suggestion then can't undo changes the author made to other parts since. Null when
+// nothing differs. Only call with values that passed validation.
+export const toSuggestionBody = (
+  values: SuggestionFormValues,
+  recipe: Recipe
+): Omit<SuggestChangesBody, 'id' | 'isSuggestion'> | null => {
+  const { ingredients, steps, tags, comments } = suggestionFormSchema.parse(values);
+  const changes = {
+    ingredients:
+      comparable(ingredients) !== comparable(recipe.ingredients) ? ingredients : undefined,
+    steps: !sameList(steps, recipe.steps) ? steps : undefined,
+    tags: !sameList(tags, normaliseTags(recipe.tags)) ? tags : undefined,
+  };
+  if (!changes.ingredients && !changes.steps && !changes.tags) {
+    return null;
+  }
+  return { ...changes, comments: comments || undefined };
+};
+
 // Where an API validation error belongs in the form. The API counts only the ingredients and
 // steps it was sent, so `ingredients[1].unit` is the second filled-in ingredient, not row 1.
-export const formPathForApiField = (path: string, values: RecipeFormValues) => {
+export const formPathForApiField = (path: string, values: RecipeContentValues) => {
   const ingredient = path.match(/^ingredients\[(\d+)\](.*)$/);
   if (ingredient) {
     return `ingredients[${ingredientRowIndex(values.ingredients, Number(ingredient[1]))}]${ingredient[2]}`;

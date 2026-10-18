@@ -25,7 +25,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { RecipeFormValues } from './recipeFormSchema';
+import { RecipeContentValues } from './recipeFormSchema';
 import {
   arrayMove,
   groupMemberKeys,
@@ -55,7 +55,7 @@ const describe = (row: IngredientListRow) =>
       'Ingredient';
 
 export function IngredientList() {
-  const { setFieldValue, getFieldProps } = useFormikContext<RecipeFormValues>();
+  const { setFieldValue, getFieldProps } = useFormikContext<RecipeContentValues>();
   const errorFor = useFieldError();
   const { rows, listRef, insertAt, removeAt, reorder } =
     useRowList<IngredientListRow>('ingredients');

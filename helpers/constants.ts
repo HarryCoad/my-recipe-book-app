@@ -10,6 +10,7 @@ export enum Routes {
   MY_RECIPES = '/my-recipes',
   NEW_RECIPE = '/my-recipes/new',
   RECIPES = '/recipes',
+  MY_SUGGESTIONS = '/suggestions',
   ANALYTICS = `/analytics`,
   SETTINGS = `/settings`,
   SECURITY = `/security`,
@@ -19,3 +20,6 @@ export enum Routes {
 
 // Any recipe the user can see, whoever wrote it
 export const recipePath = (id: string) => `${Routes.RECIPES}/${id}`;
+// Suggest changes to someone else's recipe, and review the suggestions for your own
+export const suggestPath = (id: string) => `${recipePath(id)}/suggest`;
+export const reviewSuggestionsPath = (id: string) => `${recipePath(id)}/suggestions`;

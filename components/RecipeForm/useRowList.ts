@@ -1,14 +1,14 @@
 import { useRef } from 'react';
 import { FormikTouched, getIn, useFormikContext } from 'formik';
 import { flushSync } from 'react-dom';
-import { RecipeFormValues } from './recipeFormSchema';
+import { RecipeContentValues } from './recipeFormSchema';
 
 type ListName = 'ingredients' | 'steps';
 type FocusTarget = { key: string; field: string };
 
 // Shows a field's error once it has been touched (Formik touches every field on submit)
 export const useFieldError = () => {
-  const { errors, touched } = useFormikContext<RecipeFormValues>();
+  const { errors, touched } = useFormikContext<RecipeContentValues>();
   return (name: string): string | undefined =>
     getIn(touched, name) ? getIn(errors, name) : undefined;
 };
@@ -19,7 +19,7 @@ export const useFieldError = () => {
  * `data-field`, so focus can move to a row as soon as it exists.
  */
 export function useRowList<Row extends { key: string }>(name: ListName) {
-  const { values, touched, setFieldValue, setTouched } = useFormikContext<RecipeFormValues>();
+  const { values, touched, setFieldValue, setTouched } = useFormikContext<RecipeContentValues>();
   const rows = values[name] as unknown as Row[];
   const listTouched = touched[name] as unknown[] | undefined;
   const listRef = useRef<HTMLDivElement>(null);
@@ -29,7 +29,10 @@ export function useRowList<Row extends { key: string }>(name: ListName) {
     flushSync(() => {
       setFieldValue(name, next);
       if (Array.isArray(listTouched)) {
-        setTouched({ ...touched, [name]: nextTouched } as FormikTouched<RecipeFormValues>, false);
+        setTouched(
+          { ...touched, [name]: nextTouched } as FormikTouched<RecipeContentValues>,
+          false
+        );
       }
     });
     if (focus) {

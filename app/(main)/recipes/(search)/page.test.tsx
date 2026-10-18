@@ -1,7 +1,7 @@
 import recipes from '@/devData/recipes.json';
 import { serverGet } from '@/helpers/serverApi';
 import { render, screen, within } from '@/test-utils';
-import { Recipe } from '@/types/recipe';
+import { Recipe, RecipeSearchResult } from '@/types/recipe';
 import RecipeSearchPage from './page';
 
 jest.mock('@/helpers/serverApi', () => ({
@@ -19,10 +19,22 @@ jest.mock('next/navigation', () => ({
 const get = serverGet as jest.Mock;
 
 const [first, second] = recipes as Recipe[];
-const mine: Recipe = { ...first, id: 'mine', title: 'My soup', authorId: 'me' };
-const theirs: Recipe = { ...second, id: 'theirs', title: 'Their pie', authorId: 'someone' };
+const mine: RecipeSearchResult = {
+  ...first,
+  id: 'mine',
+  title: 'My soup',
+  authorId: 'me',
+  pendingSuggestions: 0,
+};
+const theirs: RecipeSearchResult = {
+  ...second,
+  id: 'theirs',
+  title: 'Their pie',
+  authorId: 'someone',
+  pendingSuggestions: 0,
+};
 
-const respond = (data: Recipe[], totalPages = 1) =>
+const respond = (data: RecipeSearchResult[], totalPages = 1) =>
   get.mockResolvedValue({ status: 1, results: data.length, totalPages, currentPage: 1, data });
 
 // An async server component, so it's awaited before rendering what it returns

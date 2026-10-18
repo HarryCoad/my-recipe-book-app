@@ -14,13 +14,13 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useFormikContext } from 'formik';
 import { ActionIcon, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
-import { RecipeFormValues } from './recipeFormSchema';
+import { RecipeContentValues } from './recipeFormSchema';
 import { arrayMove, newStep, StepRow } from './rows';
 import { SortableRow } from './SortableRow';
 import { useFieldError, useRowList } from './useRowList';
 
 export function StepList() {
-  const { getFieldProps } = useFormikContext<RecipeFormValues>();
+  const { getFieldProps } = useFormikContext<RecipeContentValues>();
   const errorFor = useFieldError();
   const { rows, listRef, insertAt, removeAt, reorder } = useRowList<StepRow>('steps');
 

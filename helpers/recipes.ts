@@ -1,4 +1,12 @@
-import { Ingredient } from '@/types/recipe';
+import { Ingredient, Recipe } from '@/types/recipe';
+
+// Only people who saved someone else's recipe can suggest changes, if its author allows it.
+// Recipes whose author deleted them have suggestions turned off.
+export const canSuggest = (recipe: Recipe, userId: string) =>
+  recipe.authorId !== null &&
+  recipe.authorId !== userId &&
+  recipe.bAllowSuggestions &&
+  recipe.bSaved;
 
 export type IngredientGroup = {
   subheader: string | null;
@@ -63,7 +71,10 @@ export const formatQuantity = (quantity: number, unit: string) => {
 
 // Reads naturally: "200g flour", "2 tbsp oil", "3 eggs" (for pieces), "2 large onions". `scale`
 // multiplies the quantity, for cooking more or fewer servings than the recipe is written for.
-export const formatIngredient = ({ quantity, unit, name }: Ingredient, scale = 1) => {
+export const formatIngredient = (
+  { quantity, unit, name }: Pick<Ingredient, 'quantity' | 'unit' | 'name'>,
+  scale = 1
+) => {
   const amount = formatQuantity(quantity * scale, unit);
   if (unit === 'pieces') {
     return `${amount} ${name}`;

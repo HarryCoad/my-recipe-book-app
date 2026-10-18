@@ -40,8 +40,16 @@ const recipe: Recipe = {
   bDeleted: false,
 };
 
-const respond = (overrides: Partial<Recipe> = {}, bHasEdits = false) =>
-  get.mockResolvedValue({ status: 1, data: { recipe: { ...recipe, ...overrides }, bHasEdits } });
+// The recipe, and for its author, the suggestions waiting for review
+const respond = (overrides: Partial<Recipe> = {}, bHasEdits = false, pendingSuggestions = 0) =>
+  get.mockImplementation(async (url: string) =>
+    url.includes('view-suggestions')
+      ? {
+          status: 1,
+          data: { edits: Array.from({ length: pendingSuggestions }, (_, i) => ({ id: `s${i}` })) },
+        }
+      : { status: 1, data: { recipe: { ...recipe, ...overrides }, bHasEdits } }
+  );
 
 const props = (original?: string) => ({
   params: Promise.resolve({ id: 'r1' }),
@@ -145,6 +153,57 @@ describe('Recipe page', () => {
     await renderPage();
     expect(screen.queryByRole('link', { name: 'Edit recipe' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Delete recipe' })).not.toBeInTheDocument();
+  });
+
+  it('shows the author how many suggestions are waiting', async () => {
+    respond({ authorId: 'me' }, false, 2);
+    await renderPage();
+
+    expect(screen.getByRole('link', { name: 'Review suggestions, 2 waiting' })).toHaveAttribute(
+      'href',
+      '/recipes/r1/suggestions'
+    );
+    expect(get).toHaveBeenCalledWith('/api/v1/recipes/view-suggestions/r1', { params: undefined });
+    expect(screen.queryByRole('link', { name: 'Suggest changes' })).not.toBeInTheDocument();
+  });
+
+  it('only asks for suggestions on the author’s own recipes', async () => {
+    respond();
+    await renderPage();
+    expect(get).not.toHaveBeenCalledWith(
+      expect.stringContaining('view-suggestions'),
+      expect.anything()
+    );
+  });
+
+  it('lets someone who saved the recipe suggest changes', async () => {
+    respond();
+    await renderPage();
+    expect(screen.getByRole('link', { name: 'Suggest changes' })).toHaveAttribute(
+      'href',
+      '/recipes/r1/suggest'
+    );
+  });
+
+  it('asks people to save the recipe before suggesting changes', async () => {
+    respond({ bSaved: false });
+    await renderPage();
+
+    expect(screen.queryByRole('link', { name: 'Suggest changes' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Suggest changes' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
+  it.each([
+    ['closed to suggestions', { bAllowSuggestions: false }],
+    ['without an author', { authorId: null, authorName: null }],
+  ])('offers no suggestions on a recipe %s', async (_, overrides) => {
+    respond(overrides);
+    await renderPage();
+    expect(screen.queryByRole('link', { name: 'Suggest changes' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Suggest changes' })).not.toBeInTheDocument();
   });
 
   it('offers the original when the user has personal edits', async () => {
