@@ -1,0 +1,25 @@
+// Cards that link somewhere: the quick actions and the numbers at a glance
+.linkCard {
+  display: block;
+  height: 100%;
+  border-radius: var(--mantine-radius-md);
+  transition:
+    border-color 100ms ease,
+    background-color 100ms ease;
+
+  @include mantine.hover {
+    border-color: var(--mantine-color-orange-6);
+    background-color: light-dark(var(--mantine-color-orange-0), var(--mantine-color-dark-5));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mantine-color-orange-6);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linkCard {
+    transition: none;
+  }
+}

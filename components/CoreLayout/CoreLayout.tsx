@@ -4,6 +4,7 @@ import '@mantine/core/styles.css';
 
 import { AppShell, Burger, Code, Group } from '@mantine/core';
 import { useDisclosure, useLocalStorage } from '@mantine/hooks';
+import { ColorSchemeToggle } from '@/components/ColorSchemeToggle/ColorSchemeToggle';
 import { Logo } from '@/public/Logo';
 import { NavBar, NAVBAR_RAIL_WIDTH, NAVBAR_WIDTH } from '../Navigation/NavBar';
 
@@ -26,23 +27,28 @@ export default function CoreLayout({ children }: { children: any }) {
       padding="md"
     >
       <AppShell.Header>
-        <Group align="center" pl="md" style={{ height: '100%' }}>
-          <Burger
-            opened={mobileOpened}
-            onClick={toggleMobile}
-            hiddenFrom="sm"
-            size="md"
-            aria-label={mobileOpened ? 'Close menu' : 'Open menu'}
-          />
-          <Burger
-            opened={pinned}
-            onClick={() => setPinned((value) => !value)}
-            visibleFrom="sm"
-            size="md"
-            aria-label={pinned ? 'Collapse menu' : 'Keep menu open'}
-          />
-          <Logo style={{ width: 120 }} />
-          <Code fw={700}>v3.1.2</Code>
+        <Group justify="space-between" wrap="nowrap" px="md" style={{ height: '100%' }}>
+          <Group align="center" wrap="nowrap">
+            <Burger
+              opened={mobileOpened}
+              onClick={toggleMobile}
+              hiddenFrom="sm"
+              size="md"
+              aria-label={mobileOpened ? 'Close menu' : 'Open menu'}
+            />
+            <Burger
+              opened={pinned}
+              onClick={() => setPinned((value) => !value)}
+              visibleFrom="sm"
+              size="md"
+              aria-label={pinned ? 'Collapse menu' : 'Keep menu open'}
+            />
+            <Logo style={{ width: 120 }} />
+            <Code fw={700} visibleFrom="xs">
+              v3.1.2
+            </Code>
+          </Group>
+          <ColorSchemeToggle />
         </Group>
       </AppShell.Header>
 
