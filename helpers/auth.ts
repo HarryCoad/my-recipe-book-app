@@ -1,13 +1,9 @@
 // Type-only, because axios.ts imports this file
 import type { APIResponse } from '@/helpers/axios';
 import { Routes } from '@/helpers/constants';
+import type { User } from '@/types/user';
 
-export type AuthUser = {
-  id: string;
-  username: string;
-  email: string;
-  photo: string;
-};
+export type AuthUser = User;
 
 // Returned by login, signup and reset password
 export type AuthResponse = APIResponse<{ user: AuthUser }> & { token: string };

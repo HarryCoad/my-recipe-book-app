@@ -3,10 +3,9 @@ import { redirect } from 'next/navigation';
 import styles from './myRecipes.module.scss';
 import { IconPlus } from '@tabler/icons-react';
 import { Button, Group, Text, Title } from '@mantine/core';
-import { RecipeCard } from '@/components/RecipeCard/RecipeCard';
+import { RecipeList } from '@/components/RecipeList/RecipeList';
 import { RecipePagination } from '@/components/RecipePagination/RecipePagination';
-import { SaveRecipeButton } from '@/components/SaveRecipeButton/SaveRecipeButton';
-import { recipePath, Routes } from '@/helpers/constants';
+import { Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
 import { getSession, serverGet } from '@/helpers/serverApi';
 import { RecipeSearchResponse } from '@/types/recipe';
@@ -70,32 +69,8 @@ export default async function MyRecipes({ searchParams }: PageProps) {
             : `Your recipe book is empty. Create a recipe, or save other people's from Find Recipes.`}
         </Text>
       ) : (
-        <ul className={styles.list}>
-          {recipes.map((recipe) => {
-            const isOwn = recipe.authorId === userId;
-            return (
-              <li key={recipe.id}>
-                <RecipeCard
-                  recipe={recipe}
-                  href={recipePath(recipe.id)}
-                  // Only needed while the list mixes in other people's recipes
-                  isOwn={isOwn && !onlyMine}
-                  // Unsaving takes a recipe out of the book. Authors can't unsave their own
-                  action={
-                    !isOwn && (
-                      <SaveRecipeButton
-                        id={recipe.id}
-                        title={recipe.title}
-                        bSaved={recipe.bSaved}
-                        orphaned={recipe.authorName === null}
-                      />
-                    )
-                  }
-                />
-              </li>
-            );
-          })}
-        </ul>
+        // Unsaving takes a recipe out of the book
+        <RecipeList recipes={recipes} userId={userId} showOwnBadge={!onlyMine} />
       )}
 
       <RecipePagination page={page} totalPages={totalPages} />

@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation';
 import { Text } from '@mantine/core';
-import { RecipeCard } from '@/components/RecipeCard/RecipeCard';
+import { RecipeList } from '@/components/RecipeList/RecipeList';
 import { RecipePagination } from '@/components/RecipePagination/RecipePagination';
-import { SaveRecipeButton } from '@/components/SaveRecipeButton/SaveRecipeButton';
-import { recipePath, Routes } from '@/helpers/constants';
+import { Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
 import { countFilters, parseRecipeSearch, toSearchParams } from '@/helpers/recipeSearch';
 import { getSession, serverGet } from '@/helpers/serverApi';
@@ -41,26 +40,7 @@ export default async function RecipeSearchPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '1rem' }}>
-        {recipes.map((recipe) => {
-          const isOwn = recipe.authorId === userId;
-          return (
-            <li key={recipe.id}>
-              <RecipeCard
-                recipe={recipe}
-                href={recipePath(recipe.id)}
-                isOwn={isOwn}
-                // Authors always keep their own recipes saved
-                action={
-                  !isOwn && (
-                    <SaveRecipeButton id={recipe.id} title={recipe.title} bSaved={recipe.bSaved} />
-                  )
-                }
-              />
-            </li>
-          );
-        })}
-      </ul>
+      <RecipeList recipes={recipes} userId={userId} />
       <RecipePagination page={search.page} totalPages={totalPages} />
     </>
   );

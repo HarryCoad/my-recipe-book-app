@@ -6,6 +6,7 @@ import { Alert, Anchor, Container, Stack, Text, Title } from '@mantine/core';
 import BackButton from '@/components/BackButton/BackButton';
 import { SuggestionCard } from '@/components/Suggestions/SuggestionCard';
 import { SuggestionChanges } from '@/components/Suggestions/SuggestionChanges';
+import { UserLink } from '@/components/UserLink/UserLink';
 import { recipePath } from '@/helpers/constants';
 import { getSession } from '@/helpers/serverApi';
 import { Edit } from '@/types/recipe';
@@ -92,8 +93,17 @@ export default async function ReviewSuggestionsPage({ params }: PageProps) {
 }
 
 function Suggester({ suggestion }: { suggestion: Edit }) {
-  // No name when their account was deleted
+  // No name, or profile to link to, when their account was deleted
   return (
-    <Text fw={600}>{suggestion.userName ?? 'Someone who has since left'} suggested changes</Text>
+    <Text fw={600}>
+      {suggestion.userName ? (
+        <UserLink id={suggestion.userId} fw={600}>
+          {suggestion.userName}
+        </UserLink>
+      ) : (
+        'Someone who has since left'
+      )}{' '}
+      suggested changes
+    </Text>
   );
 }

@@ -3,6 +3,13 @@ export const endpoints = {
     login: '/api/v1/users/login',
     signup: '/api/v1/users/signup',
   },
+  users: {
+    // Someone's public profile
+    profile: (id: string) => `/api/v1/users/${encodeURIComponent(id)}`,
+    // The logged-in user's own details, and changing them
+    me: '/api/v1/users/user-details',
+    updateMe: '/api/v1/users/update-me',
+  },
   recipes: {
     search: '/api/v1/recipes/search',
     create: '/api/v1/recipes/create',

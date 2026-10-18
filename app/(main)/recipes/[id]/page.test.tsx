@@ -77,7 +77,10 @@ describe('Recipe page', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Spaghetti pomodoro' })).toBeVisible();
     expect(screen.getByText('Main')).toBeVisible();
-    expect(screen.getByText('By alice')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'By alice' })).toHaveAttribute(
+      'href',
+      '/users/someone'
+    );
     expect(screen.getByText('Saved by 1 person')).toBeVisible();
     expect(screen.getByText('Open to suggestions')).toBeVisible();
     expect(screen.getByText(/A quick tomato pasta/)).toBeVisible();
@@ -243,6 +246,7 @@ describe('Recipe page', () => {
     expect(screen.getByText(/The author has deleted this recipe/)).toBeVisible();
     expect(screen.queryByText('Open to suggestions')).not.toBeInTheDocument();
     expect(screen.queryByText(/^By /)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^By / })).not.toBeInTheDocument();
   });
 
   it.each([

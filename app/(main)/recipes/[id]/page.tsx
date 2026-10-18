@@ -33,7 +33,13 @@ import {
 } from '@mantine/core';
 import BackButton from '@/components/BackButton/BackButton';
 import { SaveRecipeButton } from '@/components/SaveRecipeButton/SaveRecipeButton';
-import { recipePath, reviewSuggestionsPath, Routes, suggestPath } from '@/helpers/constants';
+import {
+  recipePath,
+  reviewSuggestionsPath,
+  Routes,
+  suggestPath,
+  userPath,
+} from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
 import { canSuggest } from '@/helpers/recipes';
 import { getSession } from '@/helpers/serverApi';
@@ -198,8 +204,17 @@ export default async function RecipePage(props: PageProps) {
             Your recipe
           </Badge>
         ) : (
-          !orphaned && (
-            <Badge variant="light" color="gray" leftSection={<IconUser size={12} />}>
+          // A recipe whose author deleted it has no author to show or link to
+          recipe.authorId &&
+          recipe.authorName && (
+            <Badge
+              component={Link}
+              href={userPath(recipe.authorId)}
+              variant="light"
+              color="gray"
+              leftSection={<IconUser size={12} />}
+              style={{ cursor: 'pointer' }}
+            >
               By {recipe.authorName}
             </Badge>
           )

@@ -17,6 +17,7 @@ import {
 import { StepList } from '@/components/RecipeForm/StepList';
 import { TagInput } from '@/components/RecipeForm/TagInput';
 import { useFieldError } from '@/components/RecipeForm/useRowList';
+import { UserLink } from '@/components/UserLink/UserLink';
 import axios from '@/helpers/axios';
 import { recipePath } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
@@ -69,8 +70,14 @@ export function SuggestChangesForm({ recipe }: { recipe: Recipe }) {
         <Form noValidate>
           <Stack gap="lg">
             <Text c="dimmed" ta="center">
-              Change the ingredients, method or tags of {recipe.authorName}'s recipe. They'll review
-              your suggestion, and if they accept it, everyone will see the changes.
+              Change the ingredients, method or tags of{' '}
+              {recipe.authorId ? (
+                <UserLink id={recipe.authorId}>{recipe.authorName}</UserLink>
+              ) : (
+                recipe.authorName
+              )}
+              's recipe. They'll review your suggestion, and if they accept it, everyone will see
+              the changes.
             </Text>
             <Fieldset legend="Ingredients">
               <IngredientList />

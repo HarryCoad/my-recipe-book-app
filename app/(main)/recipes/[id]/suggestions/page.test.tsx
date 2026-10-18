@@ -73,7 +73,11 @@ describe('Review suggestions page', () => {
     });
     expect(screen.getByRole('heading', { name: 'Waiting for review (1)' })).toBeVisible();
     const card = screen.getByRole('article');
-    expect(within(card).getByText('bob suggested changes')).toBeVisible();
+    expect(within(card).getByRole('link', { name: 'bob' })).toHaveAttribute(
+      'href',
+      '/users/bob-id'
+    );
+    expect(within(card).getByText(/suggested changes/)).toHaveTextContent('bob suggested changes');
     expect(within(card).getByText('Changes the method')).toBeVisible();
     expect(within(card).getByText('Salt helps')).toBeVisible();
     expect(within(card).getByText('Boil the pasta in salted water')).toBeVisible();
@@ -85,6 +89,8 @@ describe('Review suggestions page', () => {
     respond([suggestion({ userName: null })]);
     await renderPage();
     expect(screen.getByText('Someone who has since left suggested changes')).toBeVisible();
+    // No account, so no profile to link to
+    expect(screen.queryByRole('link', { name: /Someone/ })).not.toBeInTheDocument();
   });
 
   it('lists reviewed suggestions separately, without review buttons', async () => {
