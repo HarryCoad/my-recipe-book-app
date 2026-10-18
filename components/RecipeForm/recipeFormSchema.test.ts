@@ -1,4 +1,6 @@
+import { ImportDraft } from '@/types/recipe';
 import {
+  draftToFormValues,
   emptyRecipe,
   formPathForApiField,
   recipeFormSchema,
@@ -30,6 +32,7 @@ const validRecipe: RecipeFormValues = {
   tags: ['quick', ' '],
   bPrivate: false,
   bAllowSuggestions: true,
+  sourceUrl: null,
 };
 
 const errorsFor = (values: RecipeFormValues) => {
@@ -47,7 +50,14 @@ describe('recipe form schema', () => {
       ingredients: [{ quantity: 200, unit: 'g', name: 'flour', subheader: null }],
       steps: ['Mix', 'Cook'],
       tags: ['quick'],
+      // Left out when there isn't one
+      sourceUrl: undefined,
     });
+  });
+
+  it('keeps where an imported recipe came from', () => {
+    const sourceUrl = 'https://example.com/pancakes';
+    expect(toRecipeBody({ ...validRecipe, sourceUrl }).sourceUrl).toBe(sourceUrl);
   });
 
   it('saves each heading on the ingredients below it', () => {
@@ -81,15 +91,33 @@ describe('recipe form schema', () => {
     expect(body.steps).toEqual(['Mix']);
   });
 
-  it('reports the missing fields of a partly filled ingredient, by its row', () => {
+  it('allows ingredients with no amount, and counts with no unit', () => {
+    const body = toRecipeBody({
+      ...validRecipe,
+      ingredients: [ingredient('salt, to taste', '', null), ingredient('eggs', 2, null)],
+    });
+    expect(body.ingredients).toEqual([
+      { quantity: null, unit: null, name: 'salt, to taste', subheader: null },
+      { quantity: 2, unit: null, name: 'eggs', subheader: null },
+    ]);
+  });
+
+  it('asks for the name of an ingredient that only has an amount, by its row', () => {
+    expect(
+      errorsFor({ ...validRecipe, ingredients: [ingredient('flour'), ingredient('', 2, 'g')] })
+    ).toEqual({ 'ingredients.1.name': 'Please enter the ingredient' });
+  });
+
+  it("names a unit or category that isn't one of ours, such as from an import", () => {
     expect(
       errorsFor({
         ...validRecipe,
-        ingredients: [ingredient('flour'), ingredient('eggs', '', null)],
+        category: 'Soup',
+        ingredients: [ingredient('basil', 1, 'handful')],
       })
     ).toEqual({
-      'ingredients.1.quantity': 'Please enter a quantity',
-      'ingredients.1.unit': 'Please choose a unit',
+      category: `"Soup" isn't one of our categories. Please choose one`,
+      'ingredients.0.unit': `"handful" isn't one of our units. Please choose one`,
     });
   });
 
@@ -141,6 +169,62 @@ describe('recipe form schema', () => {
     expect(formPathForApiField('ingredients[1].unit', values)).toBe('ingredients[3].unit');
     expect(formPathForApiField('steps[0]', values)).toBe('steps[1].text');
     expect(formPathForApiField('title', values)).toBe('title');
+  });
+});
+
+describe('imported drafts', () => {
+  const draft: ImportDraft = {
+    title: 'Pancakes',
+    description: null,
+    category: 'Breakfast',
+    serves: 4,
+    prepTime: 10,
+    cookTime: 0,
+    ingredients: [
+      { subheader: null, quantity: 200, unit: 'g', name: 'flour' },
+      { subheader: 'Topping', quantity: null, unit: null, name: 'syrup, to taste' },
+    ],
+    steps: ['Mix', 'Cook'],
+    tags: ['quick'],
+    bPrivate: true,
+    sourceUrl: 'https://example.com/pancakes',
+  };
+
+  it('fills in the form, leaving gaps empty so the form asks for them', () => {
+    const values = draftToFormValues(draft);
+
+    expect(values).toMatchObject({
+      title: 'Pancakes',
+      description: '',
+      serves: 4,
+      cookTime: '',
+      bPrivate: true,
+      bAllowSuggestions: false,
+      sourceUrl: 'https://example.com/pancakes',
+    });
+    expect(values.ingredients).toMatchObject([
+      { kind: 'ingredient', quantity: 200, unit: 'g', name: 'flour' },
+      { kind: 'heading', text: 'Topping' },
+      { kind: 'ingredient', quantity: '', unit: null, name: 'syrup, to taste' },
+    ]);
+    expect(errorsFor(values)).toEqual({
+      description: 'Please enter a description',
+      cookTime: 'Please enter the cook time',
+    });
+  });
+
+  it("keeps a category it couldn't map, so the form can say what it was", () => {
+    expect(errorsFor(draftToFormValues({ ...draft, category: 'Soup', cookTime: 5 }))).toMatchObject(
+      {
+        category: `"Soup" isn't one of our categories. Please choose one`,
+      }
+    );
+  });
+
+  it('starts with one empty row when the draft has no ingredients or steps', () => {
+    const values = draftToFormValues({ ...draft, ingredients: [], steps: [] });
+    expect(values.ingredients).toEqual(emptyRecipe.ingredients);
+    expect(values.steps).toEqual(emptyRecipe.steps);
   });
 });
 

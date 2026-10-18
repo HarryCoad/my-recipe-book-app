@@ -17,6 +17,14 @@ export const errorMessages: Record<string, string> = {
   CONFIRM_LOSE_EDITS: 'Unsaving this recipe will delete your personal edits.',
   AUTHOR_CANT_UNSAVE: "You can't unsave a recipe you wrote. Delete it instead.",
   SAVES_PRIVATE: "This user's saved recipes are private.",
+  INVALID_URL: "That doesn't look like a web address. Please check it and try again.",
+  URL_NOT_ALLOWED: 'Recipes can only be imported from public websites (http or https).',
+  FETCH_FAILED: "We couldn't load that page. Check the link works, or try another.",
+  INVALID_IMAGE: 'Please choose a JPEG, PNG, GIF or WebP image.',
+  IMAGE_TOO_LARGE: 'That image is too big. Please use one under 5 MB.',
+  NO_RECIPE_FOUND: "We couldn't find a recipe there.",
+  IMPORT_FAILED: 'Something went wrong reading the recipe. Please try again.',
+  TOO_MANY_IMPORTS: "You've imported a lot of recipes recently. Please wait an hour and try again.",
   SUGGESTION_ALREADY_REVIEWED: 'This suggestion has already been reviewed.',
   USERNAME_TAKEN: 'That username is already taken.',
   UNIQUE_EMAIL: 'An account with that email already exists.',
@@ -48,7 +56,9 @@ export const getErrorMessage = (err: unknown): string => {
     if (!err.response) {
       return "Couldn't reach the server. Please check your connection.";
     }
-    if (err.response.status === 429) {
+    // The general rate limit. Limits with their own code, like TOO_MANY_IMPORTS, say more
+    const code = getErrorCode(err);
+    if (err.response.status === 429 && !(code && errorMessages[code])) {
       return 'Too many requests. Please wait a while and try again.';
     }
   }

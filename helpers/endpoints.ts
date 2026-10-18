@@ -13,6 +13,9 @@ export const endpoints = {
   recipes: {
     search: '/api/v1/recipes/search',
     create: '/api/v1/recipes/create',
+    // Read a recipe from a web page or a photo into a draft for the create form
+    importUrl: '/api/v1/recipes/import-url',
+    importImage: '/api/v1/recipes/import-image',
     updateOwn: '/api/v1/recipes/update-own-recipe',
     delete: '/api/v1/recipes/delete',
     toggleSave: '/api/v1/recipes/toggle-save',

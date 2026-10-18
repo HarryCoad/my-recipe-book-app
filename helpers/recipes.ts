@@ -1,5 +1,21 @@
 import { Ingredient, Recipe } from '@/types/recipe';
 
+// The site an imported recipe came from, e.g. "bbcgoodfood.com", for attribution. Null unless it's
+// an http(s) address, so it's safe to link to
+export const sourceHost = (url: string | null | undefined) => {
+  if (!url) {
+    return null;
+  }
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol)
+      ? parsed.hostname.replace(/^www\./, '')
+      : null;
+  } catch {
+    return null;
+  }
+};
+
 // Only people who saved someone else's recipe can suggest changes, if its author allows it.
 // Recipes whose author deleted them have suggestions turned off.
 export const canSuggest = (recipe: Recipe, userId: string) =>
@@ -47,13 +63,27 @@ const FRACTIONS: [number, string][] = [
 
 const trimDecimals = (value: number, places: number) => String(Number(value.toFixed(places)));
 
+// Units that take an "s" (or "es") for more than one: "2 cups", "2 pinches"
+const PLURAL_UNITS: Record<string, string> = {
+  liter: 'liters',
+  cup: 'cups',
+  pinch: 'pinches',
+  dash: 'dashes',
+  can: 'cans',
+  bunch: 'bunches',
+  slice: 'slices',
+};
+
+// Describe the onion rather than measure it: "2 large onions", "a large onion"
+const SIZE_UNITS = ['small', 'medium', 'large'];
+
 // The quantity as a cook would write it. Grams and millilitres are whole from 10 up, kilograms and
 // litres keep two decimals, and everything else rounds to the nearest common fraction (never 0).
-export const formatQuantity = (quantity: number, unit: string) => {
-  if (SMALL_METRIC_UNITS.includes(unit)) {
+export const formatQuantity = (quantity: number, unit: string | null) => {
+  if (unit && SMALL_METRIC_UNITS.includes(unit)) {
     return trimDecimals(quantity, quantity >= 10 ? 0 : 1);
   }
-  if (LARGE_METRIC_UNITS.includes(unit)) {
+  if (unit && LARGE_METRIC_UNITS.includes(unit)) {
     return trimDecimals(quantity, 2);
   }
   let whole = Math.floor(quantity);
@@ -69,19 +99,27 @@ export const formatQuantity = (quantity: number, unit: string) => {
   return `${whole || ''}${glyph}`;
 };
 
-// Reads naturally: "200g flour", "2 tbsp oil", "3 eggs" (for pieces), "2 large onions". `scale`
-// multiplies the quantity, for cooking more or fewer servings than the recipe is written for.
+// Reads naturally: "200g flour", "2 tbsp oil", "3 eggs" (a count, or pieces), "2 large onions",
+// "2 cups milk", "pinch of salt", or just "salt, to taste" with no amount. `scale` multiplies the
+// quantity, for cooking more or fewer servings than the recipe is written for.
 export const formatIngredient = (
   { quantity, unit, name }: Pick<Ingredient, 'quantity' | 'unit' | 'name'>,
   scale = 1
 ) => {
-  const amount = formatQuantity(quantity * scale, unit);
-  if (unit === 'pieces') {
+  if (quantity === null) {
+    if (!unit) {
+      return name;
+    }
+    return SIZE_UNITS.includes(unit) ? `${unit} ${name}` : `${unit} of ${name}`;
+  }
+  const scaled = quantity * scale;
+  const amount = formatQuantity(scaled, unit);
+  if (!unit || unit === 'pieces') {
     return `${amount} ${name}`;
   }
   if (ATTACHED_UNITS.includes(unit)) {
     return `${amount}${unit} ${name}`;
   }
-  const plural = unit === 'liter' && amount !== '1' ? 'liters' : unit;
+  const plural = PLURAL_UNITS[unit] && amount !== '1' && scaled > 1 ? PLURAL_UNITS[unit] : unit;
   return `${amount} ${plural} ${name}`;
 };

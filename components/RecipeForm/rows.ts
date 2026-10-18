@@ -40,6 +40,22 @@ export const newIngredient = (): IngredientRow => ({
 export const newHeading = (): HeadingRow => ({ kind: 'heading', key: newKey(), text: '' });
 export const newStep = (): StepRow => ({ key: newKey(), text: '' });
 
+// Joins the step at `index` onto the end of the one before it, with a space between, for an import
+// that split one step into several. `caret` is where the joined step's text starts, for the cursor
+export const mergeIntoPrevious = (steps: StepRow[], index: number) => {
+  const before = steps[index - 1].text.trimEnd();
+  const after = steps[index].text.trimStart();
+  const separator = before && after ? ' ' : '';
+  return {
+    steps: [
+      ...steps.slice(0, index - 1),
+      { ...steps[index - 1], text: `${before}${separator}${after}` },
+      ...steps.slice(index + 1),
+    ],
+    caret: before.length + separator.length,
+  };
+};
+
 export const isEmptyIngredient = (row: IngredientRow) =>
   row.quantity === '' && !row.unit && !row.name.trim();
 
@@ -138,7 +154,12 @@ export const stepRowIndex = (steps: StepRow[], apiIndex: number) => {
 // Keys are fixed rather than from newKey(), because the edit form renders on the server first and
 // both sides must build the same rows. The `saved-` prefix can't clash with newKey()'s `row-`.
 export const rowsFromIngredients = (
-  ingredients: { quantity: number; unit: string; name: string; subheader?: string | null }[]
+  ingredients: {
+    quantity: number | null;
+    unit: string | null;
+    name: string;
+    subheader?: string | null;
+  }[]
 ): IngredientListRow[] => {
   const rows: IngredientListRow[] = [];
   let current: string | null = null;
@@ -148,7 +169,14 @@ export const rowsFromIngredients = (
       rows.push({ kind: 'heading', key: `saved-heading-${i}`, text: heading });
     }
     current = heading;
-    rows.push({ kind: 'ingredient', key: `saved-ingredient-${i}`, quantity, unit, name });
+    // No quantity shows as an empty input
+    rows.push({
+      kind: 'ingredient',
+      key: `saved-ingredient-${i}`,
+      quantity: quantity ?? '',
+      unit,
+      name,
+    });
   });
   return rows;
 };

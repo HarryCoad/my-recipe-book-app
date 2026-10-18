@@ -18,6 +18,8 @@ export interface Recipe {
   ingredients: Ingredient[];
   steps: string[];
   tags: string[];
+  // Where an imported recipe came from, shown as attribution. Older recipes may not have it
+  sourceUrl?: string | null;
   bSaved: boolean;
   savedCount: number;
   bDeleted: boolean;
@@ -34,12 +36,14 @@ export type RecipeSearchResponse = APIResponse<RecipeSearchResult[]> & {
   currentPage: number;
 };
 
+// quantity and unit are both null when there's no amount ("salt, to taste"). A quantity with no
+// unit is a count ("2 eggs")
 export interface Ingredient {
   id: string;
   subheader: string | null;
-  quantity: number;
+  quantity: number | null;
   name: string;
-  unit: string;
+  unit: string | null;
 }
 
 // From the API's constants/recipeConstants.ts
@@ -68,6 +72,15 @@ export const UNITS = [
   'small',
   'medium',
   'large',
+  'cup',
+  'fl oz',
+  'oz',
+  'lb',
+  'pinch',
+  'dash',
+  'can',
+  'bunch',
+  'slice',
 ] as const;
 export type Unit = (typeof UNITS)[number];
 
@@ -79,14 +92,49 @@ export type CreateRecipeBody = {
   serves: number;
   prepTime: number;
   cookTime: number;
-  ingredients: { quantity: number; unit: Unit; name: string; subheader?: string | null }[];
+  ingredients: {
+    quantity: number | null;
+    unit: Unit | null;
+    name: string;
+    subheader?: string | null;
+  }[];
   steps: string[];
   tags?: string[];
   bPrivate?: boolean;
   bAllowSuggestions?: boolean;
+  // Where an imported recipe came from. Must be an http(s) URL
+  sourceUrl?: string | null;
 };
 
 export type CreateRecipeResponse = APIResponse<{ recipe: Recipe }>;
+
+// POST /recipes/import-url and /import-image. A recipe read from a web page or photo, for the
+// user to check in the create form. Nothing is saved. It can break the create rules: gaps come
+// back as 0 or null, and anything the API couldn't map to our categories and units is left as
+// the source had it. `issues` lists those fields, in the same format as a Validation_Error
+export type ImportDraft = {
+  title: string;
+  description: string | null;
+  category: string;
+  serves: number;
+  prepTime: number;
+  cookTime: number;
+  ingredients: {
+    subheader: string | null;
+    quantity: number | null;
+    unit: string | null;
+    name: string;
+  }[];
+  steps: string[];
+  tags: string[];
+  bPrivate: boolean;
+  // The page it came from, after redirects. Null for a photo
+  sourceUrl: string | null;
+};
+export type ImportResponse = APIResponse<{
+  draft: ImportDraft;
+  issues: { fieldname: string; code: string }[];
+}>;
 
 // PATCH /recipes/update-own-recipe: author only. Fields left out stay as they are
 export type UpdateOwnRecipeBody = { id: string } & Partial<CreateRecipeBody>;

@@ -1,6 +1,7 @@
 import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
 import axios from '@/helpers/axios';
 import { render, screen, userEvent, waitFor } from '@/test-utils';
+import { ImportDraft } from '@/types/recipe';
 import { CreateRecipeForm } from './CreateRecipeForm';
 
 const replace = jest.fn();
@@ -196,4 +197,135 @@ describe('Create recipe form', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Some of the details entered are invalid.');
     expect(replace).not.toHaveBeenCalled();
   }, 30000);
+});
+
+describe('Creating a recipe from an import', () => {
+  const draft: ImportDraft = {
+    title: 'Pancakes',
+    description: 'Fluffy pancakes',
+    category: 'Breakfast',
+    serves: 4,
+    prepTime: 10,
+    // Missing from the page
+    cookTime: 0,
+    ingredients: [
+      { subheader: null, quantity: 200, unit: 'g', name: 'flour' },
+      { subheader: null, quantity: 2, unit: null, name: 'eggs' },
+      { subheader: null, quantity: 1, unit: 'handful', name: 'blueberries' },
+    ],
+    steps: ['Mix', 'Cook'],
+    tags: ['quick'],
+    bPrivate: true,
+    sourceUrl: 'https://www.example.com/pancakes',
+  };
+  const issues = [
+    { fieldname: 'cookTime', code: 'too_small' },
+    { fieldname: 'ingredients.[2].unit', code: 'invalid_enum_value' },
+  ];
+
+  const importDraft = async () => {
+    post.mockResolvedValueOnce({ data: { status: 1, data: { draft, issues } } });
+    render(<CreateRecipeForm />);
+    await userEvent.type(
+      screen.getByLabelText('Recipe web address'),
+      'example.com/pancakes{Enter}'
+    );
+    await screen.findByText('Recipe imported');
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    get.mockResolvedValue({ data: { status: 1, data: { tags: [] } } });
+  });
+
+  it('fills in the form and highlights what needs fixing', async () => {
+    await importDraft();
+
+    expect(screen.getByRole('link', { name: 'example.com' })).toHaveAttribute(
+      'href',
+      'https://www.example.com/pancakes'
+    );
+    expect(screen.getByText(/highlighted below/)).toBeVisible();
+    expect(screen.getByLabelText(/^Title/)).toHaveValue('Pancakes');
+    expect(field('Ingredient 2')).toHaveValue('eggs');
+    expect(screen.getByLabelText(/^Private/)).toBeChecked();
+
+    // Shown straight away, without touching anything
+    expect(await screen.findByText('Please enter the cook time')).toBeVisible();
+    expect(screen.getByText(`"handful" isn't one of our units. Please choose one`)).toBeVisible();
+    // The import panel makes way for the draft
+    expect(screen.queryByLabelText('Recipe web address')).not.toBeInTheDocument();
+  });
+
+  it('creates the recipe once fixed, keeping where it came from', async () => {
+    await importDraft();
+    post.mockResolvedValueOnce({ data: { status: 1, data: { recipe: { id: 'r9' } } } });
+
+    await userEvent.type(screen.getByLabelText(/^Cook time/), '15');
+    await userEvent.click(field('Ingredient 3 unit'));
+    await userEvent.click(screen.getByRole('option', { name: 'cup' }));
+    await submit();
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/recipes/r9'));
+    expect(post).toHaveBeenLastCalledWith(
+      '/api/v1/recipes/create',
+      expect.objectContaining({
+        cookTime: 15,
+        ingredients: [
+          { quantity: 200, unit: 'g', name: 'flour', subheader: null },
+          { quantity: 2, unit: null, name: 'eggs', subheader: null },
+          { quantity: 1, unit: 'cup', name: 'blueberries', subheader: null },
+        ],
+        bPrivate: true,
+        sourceUrl: 'https://www.example.com/pancakes',
+      })
+    );
+  }, 15000);
+
+  it('can merge steps the import split too finely', async () => {
+    await importDraft();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Merge step 2 into step 1' }));
+
+    expect(field('Step 1')).toHaveValue('Mix Cook');
+    expect(screen.queryByRole('textbox', { name: 'Step 2' })).not.toBeInTheDocument();
+    // One step left, so nothing more to merge
+    expect(screen.queryByRole('button', { name: /^Merge step/ })).not.toBeInTheDocument();
+  });
+
+  it('Backspace at the start of a step merges it from the keyboard, leaving the cursor at the join', async () => {
+    await importDraft();
+
+    const step2 = field('Step 2') as HTMLTextAreaElement;
+    await userEvent.click(step2);
+    step2.setSelectionRange(0, 0);
+    await userEvent.keyboard('{Backspace}');
+
+    const step1 = field('Step 1') as HTMLTextAreaElement;
+    expect(step1).toHaveValue('Mix Cook');
+    expect(step1).toHaveFocus();
+    expect(step1.selectionStart).toBe('Mix '.length);
+  });
+
+  it("doesn't offer merging on a recipe typed in by hand", async () => {
+    render(<CreateRecipeForm />);
+    await userEvent.type(field('Step 1'), 'Mix');
+    await userEvent.tab();
+    await userEvent.keyboard('Cook');
+
+    expect(screen.queryByRole('button', { name: /^Merge step/ })).not.toBeInTheDocument();
+    // Backspace at the start of a step just does nothing, as before
+    const step2 = field('Step 2') as HTMLTextAreaElement;
+    step2.setSelectionRange(0, 0);
+    await userEvent.keyboard('{Backspace}');
+    expect(step2).toHaveValue('Cook');
+  });
+
+  it('can start again from a blank form', async () => {
+    await importDraft();
+    await userEvent.click(screen.getByRole('button', { name: 'Start again' }));
+
+    expect(screen.getByLabelText(/^Title/)).toHaveValue('');
+    expect(screen.getByLabelText('Recipe web address')).toBeVisible();
+  });
 });

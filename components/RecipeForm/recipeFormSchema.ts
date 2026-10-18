@@ -3,6 +3,7 @@ import { z, ZodSchema } from 'zod';
 import { MAX_TAG_LENGTH, MAX_TAGS, normaliseTags } from '@/helpers/tags';
 import {
   CreateRecipeBody,
+  ImportDraft,
   Ingredient,
   Recipe,
   RECIPE_CATEGORIES,
@@ -31,6 +32,8 @@ export type RecipeFormValues = {
   tags: string[];
   bPrivate: boolean;
   bAllowSuggestions: boolean;
+  // Where an imported recipe came from. Kept as it is: the form doesn't change it
+  sourceUrl: string | null;
 };
 
 // The parts IngredientList and StepList edit, so forms other than the full recipe can use them
@@ -51,6 +54,7 @@ export const emptyRecipe: RecipeFormValues = {
   tags: [],
   bPrivate: false,
   bAllowSuggestions: false,
+  sourceUrl: null,
 };
 
 // The form filled in with a saved recipe, for editing it. Keys are fixed (see rowsFromIngredients)
@@ -71,6 +75,30 @@ export const recipeToFormValues = (recipe: Recipe): RecipeFormValues => ({
   tags: recipe.tags,
   bPrivate: recipe.bPrivate,
   bAllowSuggestions: recipe.bAllowSuggestions,
+  sourceUrl: recipe.sourceUrl ?? null,
+});
+
+// A recipe imported from a web page or photo, for the user to check before creating it. Gaps the
+// API filled with 0 are left empty, so the form asks for them rather than showing 0. Categories
+// and units that aren't ours are kept, so the form can show what the source said and ask for one
+// of ours instead (see optionError)
+export const draftToFormValues = (draft: ImportDraft): RecipeFormValues => ({
+  title: draft.title,
+  description: draft.description ?? '',
+  category: draft.category || null,
+  serves: draft.serves || '',
+  prepTime: draft.prepTime || '',
+  cookTime: draft.cookTime || '',
+  ingredients: draft.ingredients.length
+    ? rowsFromIngredients(draft.ingredients)
+    : emptyRecipe.ingredients,
+  steps: draft.steps.length
+    ? draft.steps.map((text, i) => ({ key: `saved-step-${i}`, text }))
+    : emptyRecipe.steps,
+  tags: draft.tags,
+  bPrivate: draft.bPrivate,
+  bAllowSuggestions: false,
+  sourceUrl: draft.sourceUrl,
 });
 
 // An empty number input counts as missing rather than as 0
@@ -87,12 +115,35 @@ const positiveNumber = (missing: string, { integer = false } = {}) => {
 
 const requiredText = (message: string) => z.string().trim().min(1, message);
 
-const option = <T extends readonly [string, ...string[]]>(options: T, message: string) =>
-  z.enum(options, { errorMap: () => ({ message }) });
+// One of a fixed list. Something else, such as an imported "handful", is named in the message so
+// the user knows what the source said
+type OptionKind = { one: string; many: string };
+const optionError =
+  ({ one, many }: OptionKind) =>
+  (_: z.ZodIssueOptionalMessage, ctx: z.ErrorMapCtx) => ({
+    message:
+      typeof ctx.data === 'string' && ctx.data.trim()
+        ? `"${ctx.data}" isn't one of our ${many}. Please choose one`
+        : `Please choose a ${one}`,
+  });
 
+const option = <T extends readonly [string, ...string[]]>(options: T, kind: OptionKind) =>
+  z.enum(options, { errorMap: optionError(kind) });
+
+// Both are optional: no amount at all is "salt, to taste", and a quantity with no unit is a count
+// ("2 eggs"). An empty quantity input or unit select means none
 const ingredientSchema = z.object({
-  quantity: positiveNumber('Please enter a quantity'),
-  unit: option(UNITS, 'Please choose a unit'),
+  quantity: z.preprocess(
+    (value) => (value === '' ? null : value),
+    z
+      .number({ invalid_type_error: 'Please enter a number' })
+      .positive('Must be more than 0')
+      .nullable()
+  ),
+  unit: z.preprocess(
+    (value) => value || null,
+    option(UNITS, { one: 'unit', many: 'units' }).nullable()
+  ),
   name: requiredText('Please enter the ingredient'),
 });
 
@@ -170,7 +221,7 @@ const tagsSchema = z
 export const recipeFormSchema = z.object({
   title: requiredText('Please enter a title'),
   description: requiredText('Please enter a description'),
-  category: option(RECIPE_CATEGORIES, 'Please choose a category'),
+  category: option(RECIPE_CATEGORIES, { one: 'category', many: 'categories' }),
   serves: positiveNumber('Please enter how many it serves', { integer: true }),
   prepTime: positiveNumber('Please enter the prep time', { integer: true }),
   cookTime: positiveNumber('Please enter the cook time', { integer: true }),
@@ -179,6 +230,11 @@ export const recipeFormSchema = z.object({
   tags: tagsSchema,
   bPrivate: z.boolean(),
   bAllowSuggestions: z.boolean(),
+  // Left out of the request when there isn't one
+  sourceUrl: z
+    .string()
+    .nullable()
+    .transform((url) => url ?? undefined),
 });
 
 // withZodSchema assumes the form values match the schema's output, but here the inputs can still

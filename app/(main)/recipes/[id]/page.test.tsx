@@ -233,6 +233,41 @@ describe('Recipe page', () => {
     expect(screen.queryByText(/includes your personal changes/)).not.toBeInTheDocument();
   });
 
+  it('credits the site an imported recipe came from', async () => {
+    respond({ sourceUrl: 'https://www.example.com/pasta' });
+    await renderPage();
+
+    const link = screen.getByRole('link', { name: 'example.com' });
+    expect(link).toHaveAttribute('href', 'https://www.example.com/pasta');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer nofollow');
+  });
+
+  it.each([
+    ['no source', null],
+    ['a source that isn’t a web page', 'ftp://example.com/pasta'],
+  ])('shows no credit for %s', async (_, sourceUrl) => {
+    respond({ sourceUrl });
+    await renderPage();
+    expect(screen.queryByText(/Imported from/)).not.toBeInTheDocument();
+  });
+
+  it('shows ingredients with no amount, and counts with no unit', async () => {
+    respond({
+      ingredients: [
+        { id: 'i1', subheader: null, quantity: null, unit: null, name: 'salt, to taste' },
+        { id: 'i2', subheader: null, quantity: 2, unit: null, name: 'eggs' },
+      ],
+    });
+    await renderPage();
+
+    expect(screen.getByText('salt, to taste')).toBeVisible();
+    expect(screen.getByText('2 eggs')).toBeVisible();
+    // Scaling leaves "to taste" alone
+    await userEvent.click(screen.getByRole('button', { name: 'More servings' }));
+    expect(screen.getByText('salt, to taste')).toBeVisible();
+  });
+
   it('shows an older recipe that has no description', async () => {
     respond({ description: null });
     await renderPage();

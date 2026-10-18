@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyboardEvent, useId, useState } from 'react';
+import { Fragment, KeyboardEvent, useId, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -11,18 +11,29 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconFold, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useFormikContext } from 'formik';
-import { ActionIcon, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
+import { ActionIcon, Button, Group, Paper, Stack, Text, Textarea, Tooltip } from '@mantine/core';
 import { RecipeContentValues } from './recipeFormSchema';
-import { arrayMove, newStep, StepRow } from './rows';
+import { arrayMove, mergeIntoPrevious, newStep, StepRow } from './rows';
 import { SortableRow } from './SortableRow';
 import { useFieldError, useRowList } from './useRowList';
 
-export function StepList() {
+type StepListProps = {
+  // Offer to join each step onto the one before it, for imports that split steps too finely
+  mergeable?: boolean;
+};
+
+export function StepList({ mergeable = false }: StepListProps) {
   const { getFieldProps } = useFormikContext<RecipeContentValues>();
   const errorFor = useFieldError();
-  const { rows, listRef, insertAt, removeAt, reorder } = useRowList<StepRow>('steps');
+  const { rows, listRef, insertAt, removeAt, reorder, replaceRows } = useRowList<StepRow>('steps');
+
+  // The cursor goes where the two steps join
+  const merge = (index: number) => {
+    const { steps, caret } = mergeIntoPrevious(rows, index);
+    replaceRows(steps, { key: rows[index - 1].key, field: 'text', caret });
+  };
 
   const dndId = useId();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
@@ -63,6 +74,21 @@ export function StepList() {
       event.preventDefault();
       const neighbour = rows[index - 1] ?? rows[index + 1];
       removeAt(index, { key: neighbour.key, field: 'text' });
+      return;
+    }
+
+    // Backspace at the very start of a step joins it onto the one before, as in a text editor.
+    // The keyboard's way to merge, since Tab skips the merge buttons
+    const { selectionStart, selectionEnd } = event.currentTarget as HTMLTextAreaElement;
+    if (
+      mergeable &&
+      event.key === 'Backspace' &&
+      index > 0 &&
+      selectionStart === 0 &&
+      selectionEnd === 0
+    ) {
+      event.preventDefault();
+      merge(index);
     }
   };
 
@@ -84,38 +110,59 @@ export function StepList() {
             {rows.map((step, index) => {
               const label = `Step ${index + 1}`;
               return (
-                <SortableRow key={step.key} id={step.key} label={label.toLowerCase()}>
-                  {(handle) => (
-                    <Group align="flex-start" wrap="nowrap" gap="xs">
-                      <Stack gap={0} mt={24}>
-                        {handle}
-                      </Stack>
-                      <Textarea
-                        label={label}
-                        autosize
-                        minRows={2}
-                        style={{ flexGrow: 1 }}
-                        data-row-key={step.key}
-                        data-field="text"
-                        error={errorFor(`steps[${index}].text`)}
-                        {...getFieldProps(`steps[${index}].text`)}
-                        onKeyDown={handleKeyDown(step, index)}
-                      />
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        size="lg"
-                        mt={24}
-                        tabIndex={-1}
-                        aria-label={`Remove ${label.toLowerCase()}`}
-                        disabled={rows.length === 1}
-                        onClick={() => removeAt(index)}
-                      >
-                        <IconTrash size={18} />
-                      </ActionIcon>
+                <Fragment key={step.key}>
+                  {/* Hidden while dragging, so only the steps move */}
+                  {mergeable && index > 0 && activeKey === null && (
+                    <Group justify="center" my={-6}>
+                      <Tooltip label={`Join onto step ${index}`}>
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          size="sm"
+                          // Like the delete buttons, Tab skips it. Backspace at the start of a
+                          // step does the same from the keyboard
+                          tabIndex={-1}
+                          aria-label={`Merge step ${index + 1} into step ${index}`}
+                          onClick={() => merge(index)}
+                        >
+                          <IconFold size={30} />
+                        </ActionIcon>
+                      </Tooltip>
                     </Group>
                   )}
-                </SortableRow>
+                  <SortableRow id={step.key} label={label.toLowerCase()}>
+                    {(handle) => (
+                      <Group align="flex-start" wrap="nowrap" gap="xs">
+                        <Stack gap={0} mt={24}>
+                          {handle}
+                        </Stack>
+                        <Textarea
+                          label={label}
+                          autosize
+                          minRows={2}
+                          style={{ flexGrow: 1 }}
+                          data-row-key={step.key}
+                          data-field="text"
+                          error={errorFor(`steps[${index}].text`)}
+                          {...getFieldProps(`steps[${index}].text`)}
+                          onKeyDown={handleKeyDown(step, index)}
+                        />
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          size="lg"
+                          mt={24}
+                          tabIndex={-1}
+                          aria-label={`Remove ${label.toLowerCase()}`}
+                          disabled={rows.length === 1}
+                          onClick={() => removeAt(index)}
+                        >
+                          <IconTrash size={18} />
+                        </ActionIcon>
+                      </Group>
+                    )}
+                  </SortableRow>
+                </Fragment>
               );
             })}
           </Stack>

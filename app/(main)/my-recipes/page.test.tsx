@@ -76,8 +76,8 @@ describe('My recipes page', () => {
       params: { authorId: 'me', page: 1 },
     });
     expect(screen.getByRole('switch', { name: 'Only recipes I created' })).toBeChecked();
-    // Every recipe here is theirs, so the badge would just be noise
-    expect(screen.queryByText('Your recipe')).not.toBeInTheDocument();
+    // Kept, so the cards look the same whether the switch is on or off
+    expect(within(card('My soup')).getByText('Your recipe')).toBeVisible();
   });
 
   it.each([
@@ -134,6 +134,22 @@ describe('My recipes page', () => {
     await renderPage(query);
 
     expect(screen.getByText(message)).toBeVisible();
+  });
+
+  it('offers importing a recipe from a website or a photo', async () => {
+    get.mockResolvedValue(searchResponse([mine]));
+    await renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+
+    expect(await screen.findByRole('menuitem', { name: 'From a website' })).toHaveAttribute(
+      'href',
+      '/my-recipes/new?import=url'
+    );
+    expect(screen.getByRole('menuitem', { name: 'From a photo' })).toHaveAttribute(
+      'href',
+      '/my-recipes/new?import=image'
+    );
   });
 
   it.each([

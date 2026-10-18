@@ -9,6 +9,7 @@ import { Routes } from '@/helpers/constants';
 import { endpoints } from '@/helpers/endpoints';
 import { getSession, serverGet } from '@/helpers/serverApi';
 import { RecipeSearchResponse } from '@/types/recipe';
+import { ImportMenu } from './ImportMenu';
 import { OnlyMineSwitch } from './OnlyMineSwitch';
 
 type PageProps = {
@@ -46,7 +47,8 @@ export default async function MyRecipes({ searchParams }: PageProps) {
     <div className={styles.page}>
       <div className={styles.header}>
         <Title className={styles.title}>My Recipes</Title>
-        <div className={styles.actions}>
+        <Group className={styles.actions} gap="xs" wrap="nowrap">
+          <ImportMenu />
           <Button
             component={Link}
             href={Routes.NEW_RECIPE}
@@ -55,7 +57,7 @@ export default async function MyRecipes({ searchParams }: PageProps) {
           >
             Create recipe
           </Button>
-        </div>
+        </Group>
       </div>
 
       <Group justify="flex-end" mt="md">

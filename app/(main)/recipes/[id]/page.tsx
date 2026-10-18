@@ -4,6 +4,7 @@ import styles from './myRecipe.module.scss';
 import {
   IconBookmark,
   IconClock,
+  IconExternalLink,
   IconFlame,
   IconInfoCircle,
   IconLock,
@@ -39,7 +40,7 @@ import {
   userPath,
 } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
-import { canSuggest } from '@/helpers/recipes';
+import { canSuggest, sourceHost } from '@/helpers/recipes';
 import { getSession } from '@/helpers/serverApi';
 import { DeleteRecipeButton } from './DeleteRecipeButton';
 import { getRecipe } from './getRecipe';
@@ -213,6 +214,22 @@ export default async function RecipePage(props: PageProps) {
       {recipe.description && (
         <Text mt="lg" maw={700} mx="auto" ta="center" style={{ whiteSpace: 'pre-line' }}>
           {recipe.description}
+        </Text>
+      )}
+
+      {/* Credit for an imported recipe. Only linked when it's an http(s) address */}
+      {sourceHost(recipe.sourceUrl) && (
+        <Text size="sm" c="dimmed" ta="center" mt="xs">
+          Imported from{' '}
+          <Anchor
+            href={recipe.sourceUrl!}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            size="sm"
+          >
+            {sourceHost(recipe.sourceUrl)}
+            <IconExternalLink size={12} style={{ marginLeft: 2, verticalAlign: 'middle' }} />
+          </Anchor>
         </Text>
       )}
 

@@ -2,6 +2,7 @@ import {
   groupMemberKeys,
   IngredientListRow,
   ingredientRowIndex,
+  mergeIntoPrevious,
   moveGroup,
   moveRowBy,
   rowsFromIngredients,
@@ -117,5 +118,30 @@ describe('ingredient rows', () => {
   it('gives built rows the same keys every time, so server and browser rendering agree', () => {
     const saved = [{ quantity: 1, unit: 'g', name: 'salt', subheader: 'Sauce' }];
     expect(keys(rowsFromIngredients(saved))).toEqual(keys(rowsFromIngredients(saved)));
+  });
+});
+
+describe('merging steps', () => {
+  const steps = (...texts: string[]) => texts.map((text, i) => ({ key: `s${i}`, text }));
+
+  it('joins a step onto the one before it, with a space, keeping the first step', () => {
+    const { steps: merged, caret } = mergeIntoPrevious(
+      steps('Mix the flour ', ' and the eggs.', 'Cook'),
+      1
+    );
+    expect(merged).toEqual([
+      { key: 's0', text: 'Mix the flour and the eggs.' },
+      { key: 's2', text: 'Cook' },
+    ]);
+    // Where "and the eggs." starts
+    expect(caret).toBe('Mix the flour '.length);
+  });
+
+  it('adds no space when either step is empty', () => {
+    expect(mergeIntoPrevious(steps('', 'Cook'), 1)).toEqual({
+      steps: [{ key: 's0', text: 'Cook' }],
+      caret: 0,
+    });
+    expect(mergeIntoPrevious(steps('Mix', ''), 1).steps).toEqual([{ key: 's0', text: 'Mix' }]);
   });
 });

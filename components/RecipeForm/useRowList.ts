@@ -4,7 +4,8 @@ import { flushSync } from 'react-dom';
 import { RecipeContentValues } from './recipeFormSchema';
 
 type ListName = 'ingredients' | 'steps';
-type FocusTarget = { key: string; field: string };
+// `caret` is where the cursor goes, at the end by default
+type FocusTarget = { key: string; field: string; caret?: number };
 
 // Shows a field's error once it has been touched (Formik touches every field on submit)
 export const useFieldError = () => {
@@ -41,7 +42,8 @@ export function useRowList<Row extends { key: string }>(name: ListName) {
       );
       element?.focus();
       // Put the cursor at the end, e.g. after Backspace removes the row below
-      element?.setSelectionRange?.(element.value.length, element.value.length);
+      const caret = focus.caret ?? element?.value.length ?? 0;
+      element?.setSelectionRange?.(caret, caret);
     }
   };
 
@@ -61,8 +63,8 @@ export function useRowList<Row extends { key: string }>(name: ListName) {
     );
   };
 
-  // `next` holds the same rows in a new order
-  const reorder = (next: Row[], focus?: FocusTarget) => {
+  // `next` holds some of the current rows, matched by key: reordered, changed or fewer of them
+  const replaceRows = (next: Row[], focus?: FocusTarget) => {
     const oldIndex = new Map(rows.map((row, i) => [row.key, i]));
     setRows(
       next,
@@ -71,5 +73,8 @@ export function useRowList<Row extends { key: string }>(name: ListName) {
     );
   };
 
-  return { rows, listRef, insertAt, removeAt, reorder };
+  // `next` holds the same rows in a new order
+  const reorder = replaceRows;
+
+  return { rows, listRef, insertAt, removeAt, reorder, replaceRows };
 }

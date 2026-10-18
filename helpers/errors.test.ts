@@ -30,6 +30,12 @@ describe('error helpers', () => {
     expect(getErrorMessage(apiError(429, 'Too many requests'))).toMatch(/Too many requests/);
   });
 
+  it('prefers a rate limit with its own code over the general message', () => {
+    expect(getErrorMessage(apiError(429, { status: 0, message: 'TOO_MANY_IMPORTS' }))).toMatch(
+      /wait an hour/
+    );
+  });
+
   it('returns no code for errors that did not come from the API', () => {
     expect(getErrorCode(new Error('boom'))).toBeNull();
   });

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { Form, Formik, FormikHelpers, useFormikContext } from 'formik';
+import { Form, Formik, FormikHelpers, setNestedObjectValues, useFormikContext } from 'formik';
 import {
   Alert,
   Button,
@@ -38,6 +38,11 @@ type RecipeFormProps = {
   // Gets the validated, cleaned-up body for the API. If it throws an API error, the form shows it,
   // with any validation errors next to their fields.
   onSubmit: (body: CreateRecipeBody) => Promise<void>;
+  // Show what needs fixing straight away, rather than once each field is left or the form is
+  // sent. For imported drafts, which can have gaps
+  highlightErrors?: boolean;
+  // Offer to join steps together, for imports that split one step into several
+  mergeableSteps?: boolean;
 };
 
 export function RecipeForm({
@@ -45,6 +50,8 @@ export function RecipeForm({
   submitLabel,
   cancelHref,
   onSubmit,
+  highlightErrors = false,
+  mergeableSteps = false,
 }: RecipeFormProps) {
   const handleSubmit = async (
     values: RecipeFormValues,
@@ -66,6 +73,9 @@ export function RecipeForm({
       initialValues={initialValues}
       validate={validateRecipeForm}
       onSubmit={handleSubmit}
+      // Every field counts as touched, so its error shows as soon as validation runs
+      initialTouched={highlightErrors ? setNestedObjectValues(initialValues, true) : undefined}
+      validateOnMount={highlightErrors}
     >
       {({ status, isSubmitting }) => (
         <Form noValidate>
@@ -77,7 +87,7 @@ export function RecipeForm({
               <IngredientList />
             </Fieldset>
             <Fieldset legend="Method">
-              <StepList />
+              <StepList mergeable={mergeableSteps} />
             </Fieldset>
             <Fieldset legend="Tags and sharing">
               <SharingFields />
@@ -145,7 +155,12 @@ function AboutFields() {
         label="Category"
         placeholder="Choose a category"
         withAsterisk
-        data={RECIPE_CATEGORIES}
+        // A category that isn't ours, such as from an import, is shown so its error makes sense
+        data={
+          values.category && !(RECIPE_CATEGORIES as readonly string[]).includes(values.category)
+            ? [...RECIPE_CATEGORIES, values.category]
+            : [...RECIPE_CATEGORIES]
+        }
         value={values.category}
         onChange={(value) => setFieldValue('category', value)}
         onBlur={getFieldProps('category').onBlur}

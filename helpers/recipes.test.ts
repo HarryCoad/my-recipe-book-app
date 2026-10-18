@@ -39,6 +39,22 @@ describe('formatIngredient', () => {
     [{ quantity: 2, unit: 'large', name: 'onions' }, '2 large onions'],
     [{ quantity: 1, unit: 'liter', name: 'stock' }, '1 liter stock'],
     [{ quantity: 2, unit: 'liter', name: 'stock' }, '2 liters stock'],
+    // A quantity with no unit is a count
+    [{ quantity: 2, unit: null, name: 'eggs' }, '2 eggs'],
+    [{ quantity: 0.5, unit: null, name: 'lemon' }, '½ lemon'],
+    // No amount at all
+    [{ quantity: null, unit: null, name: 'salt, to taste' }, 'salt, to taste'],
+    [{ quantity: null, unit: 'pinch', name: 'salt' }, 'pinch of salt'],
+    [{ quantity: null, unit: 'large', name: 'onion' }, 'large onion'],
+    // The newer units, which take plurals
+    [{ quantity: 1, unit: 'cup', name: 'milk' }, '1 cup milk'],
+    [{ quantity: 2, unit: 'cup', name: 'milk' }, '2 cups milk'],
+    [{ quantity: 0.5, unit: 'cup', name: 'milk' }, '½ cup milk'],
+    [{ quantity: 1.5, unit: 'cup', name: 'milk' }, '1½ cups milk'],
+    [{ quantity: 2, unit: 'pinch', name: 'salt' }, '2 pinches salt'],
+    [{ quantity: 3, unit: 'slice', name: 'bread' }, '3 slices bread'],
+    [{ quantity: 8, unit: 'oz', name: 'cheese' }, '8 oz cheese'],
+    [{ quantity: 4, unit: 'fl oz', name: 'cream' }, '4 fl oz cream'],
   ])('%o reads as "%s"', (parts, expected) => {
     expect(formatIngredient({ id: 'x', subheader: null, ...parts } as Ingredient)).toBe(expected);
   });
@@ -54,6 +70,10 @@ describe('formatIngredient', () => {
     [{ quantity: 1, unit: 'tsp', name: 'cumin' }, 1 / 3, '⅓ tsp cumin'],
     [{ quantity: 2, unit: 'cloves', name: 'garlic' }, 2.98, '6 cloves garlic'],
     [{ quantity: 1, unit: 'pieces', name: 'lemon' }, 1 / 8, '¼ lemon'],
+    [{ quantity: 3, unit: null, name: 'eggs' }, 2, '6 eggs'],
+    [{ quantity: 1, unit: 'cup', name: 'rice' }, 2, '2 cups rice'],
+    // No amount, so nothing to scale
+    [{ quantity: null, unit: null, name: 'salt, to taste' }, 2, 'salt, to taste'],
   ])('%o times %d reads as "%s"', (parts, scale, expected) => {
     expect(formatIngredient({ id: 'x', subheader: null, ...parts } as Ingredient, scale)).toBe(
       expected
