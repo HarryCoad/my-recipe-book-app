@@ -78,7 +78,7 @@ describe('Recipe search results', () => {
 
     expect(within(card('Their pie')).queryByText('Your recipe')).toBeNull();
     expect(within(card('Their pie')).getByRole('button', { name: /save recipe/i })).toBeVisible();
-    expect(within(card('Their pie')).getByRole('link', { name: 'View Recipe' })).toHaveAttribute(
+    expect(within(card('Their pie')).getByRole('link', { name: 'Their pie' })).toHaveAttribute(
       'href',
       '/recipes/theirs'
     );

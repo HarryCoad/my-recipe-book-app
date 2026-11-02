@@ -16,6 +16,7 @@ import {
   Textarea,
   Title,
 } from '@mantine/core';
+import { TakePhotoButton } from '@/components/TakePhotoButton/TakePhotoButton';
 import { ImportQueue, isPending, progress, QueueItem } from '@/helpers/importQueue';
 import {
   ChosenPhoto,
@@ -26,6 +27,7 @@ import {
   parseLinks,
   sendImport,
 } from '@/helpers/imports';
+import { prepareImages } from '@/helpers/prepareImage';
 import { useLeaveGuard } from '@/helpers/useLeaveGuard';
 import { PhotoList } from './PhotoList';
 import { QueueList } from './QueueList';
@@ -66,11 +68,14 @@ export function BulkImport() {
   useLeaveGuard(pending > 0 || toReview.length > 0, LEAVE_MESSAGE);
 
   // Added after the ones already chosen, in the order picked
-  const addPhotos = (files: File[]) =>
+  // Photos too big to upload, such as from a phone camera, are made smaller first
+  const addPhotos = async (files: File[]) => {
+    const prepared = await prepareImages(files);
     setPhotos((current) => [
       ...current,
-      ...files.map((file) => ({ id: `photo-${++lastPhotoId}`, file, combine: false })),
+      ...prepared.map((file) => ({ id: `photo-${++lastPhotoId}`, file, combine: false })),
     ]);
+  };
 
   const handleDrop = (event: DragEvent) => {
     event.preventDefault();
@@ -132,7 +137,8 @@ export function BulkImport() {
               <Text size="sm" c="dimmed">
                 Each photo is a recipe. For a recipe over several pages, choose its photos in page
                 order and tick "Same recipe as above" on the later pages (up to{' '}
-                {MAX_IMAGES_PER_RECIPE}). JPEG, PNG, GIF or WebP, up to 5 MB each.
+                {MAX_IMAGES_PER_RECIPE}). JPEG, PNG, GIF or WebP. Big photos are made smaller to
+                fit.
               </Text>
               <Group gap="sm">
                 <FileButton multiple accept={IMAGE_TYPES.join(',')} onChange={addPhotos}>
@@ -147,6 +153,8 @@ export function BulkImport() {
                     </Button>
                   )}
                 </FileButton>
+                {/* Each photo taken is its own recipe, unless ticked as the same as the one above */}
+                <TakePhotoButton onCapture={(taken) => addPhotos([taken])} />
                 <Text size="sm" c="dimmed">
                   or drop them here
                 </Text>

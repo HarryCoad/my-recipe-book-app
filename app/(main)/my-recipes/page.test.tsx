@@ -61,7 +61,7 @@ describe('My recipes page', () => {
     expect(within(card('My soup')).queryByRole('button', { name: /save recipe/i })).toBeNull();
     // Saved recipes can be unsaved from here
     expect(within(card('Their pie')).getByRole('button', { name: 'Unsave recipe' })).toBeVisible();
-    expect(within(card('Their pie')).getByRole('link', { name: 'View Recipe' })).toHaveAttribute(
+    expect(within(card('Their pie')).getByRole('link', { name: 'Their pie' })).toHaveAttribute(
       'href',
       `/recipes/${saved.id}`
     );

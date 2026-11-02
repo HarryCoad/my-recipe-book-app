@@ -12,9 +12,19 @@ export interface LinksGroupProps {
   initiallyOpened?: boolean;
   links?: { label: string; link: string }[];
   link?: string;
+  // Called when a link is chosen, such as to close the mobile menu. Not for a group's heading,
+  // which only opens and closes its links
+  onNavigate?: () => void;
 }
 
-export function NavLinkGroup({ icon: Icon, label, initiallyOpened, links, link }: LinksGroupProps) {
+export function NavLinkGroup({
+  icon: Icon,
+  label,
+  initiallyOpened,
+  links,
+  link,
+  onNavigate,
+}: LinksGroupProps) {
   const pathname = usePathname();
   // Its own page, or one inside it like /recipes/<id>. Home only matches itself
   const active =
@@ -25,7 +35,7 @@ export function NavLinkGroup({ icon: Icon, label, initiallyOpened, links, link }
     links?.some((lk) => lk.link === pathname) || initiallyOpened || false
   );
   const items = (hasLinks ? links : []).map((link, i) => (
-    <Link key={i} href={link.link} className={classes.link}>
+    <Link key={i} href={link.link} className={classes.link} onClick={onNavigate}>
       {link.label}
     </Link>
   ));
@@ -36,7 +46,12 @@ export function NavLinkGroup({ icon: Icon, label, initiallyOpened, links, link }
         component={link ? Link : undefined}
         // @ts-ignore
         href={link ? link : undefined}
-        onClick={() => setOpened((o) => !o)}
+        onClick={() => {
+          setOpened((o) => !o);
+          if (link) {
+            onNavigate?.();
+          }
+        }}
         className={classes.control}
         data-active={active || undefined}
         aria-current={active ? 'page' : undefined}

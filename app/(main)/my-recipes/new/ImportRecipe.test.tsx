@@ -143,6 +143,35 @@ describe('Import recipe', () => {
     );
   });
 
+  it('adds each photo taken with the camera as the next page, up to 4', async () => {
+    jest.spyOn(window, 'matchMedia').mockImplementation(
+      (query) =>
+        ({
+          matches: query === '(pointer: coarse)',
+          media: query,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+          addListener: jest.fn(),
+          removeListener: jest.fn(),
+        }) as unknown as MediaQueryList
+    );
+    respond();
+    render(<ImportRecipe initialSource="image" onImport={jest.fn()} />);
+    const camera = () => document.querySelector('input[type="file"][capture]') as HTMLInputElement;
+    const takePhoto = screen.getByRole('button', { name: 'Take a photo' });
+
+    const pages = ['1', '2', '3', '4'].map((n) => photo(`page${n}.jpg`));
+    for (const page of pages) {
+      await userEvent.upload(camera(), page);
+    }
+
+    expect(takePhoto).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    expect((post.mock.calls[0][1] as FormData).getAll('image')).toEqual(pages);
+    jest.restoreAllMocks();
+  });
+
   it('links to bulk import for lots of recipes', () => {
     render(<ImportRecipe onImport={jest.fn()} />);
     expect(screen.getByRole('link', { name: 'Import lots at once' })).toHaveAttribute(

@@ -16,11 +16,15 @@ type NavBarProps = {
   // On desktop, show only the icons until it's hovered or focused, then expand over the page.
   // Mobile always shows the full menu
   rail?: boolean;
+  // Called when a link is chosen, such as to close the mobile menu
+  onNavigate?: () => void;
 };
 
-export function NavBar({ rail = false }: NavBarProps) {
+export function NavBar({ rail = false, onNavigate }: NavBarProps) {
   const router = useRouter();
-  const links = NAV_DATA.map((item) => <NavLinkGroup {...item} key={item.label} />);
+  const links = NAV_DATA.map((item) => (
+    <NavLinkGroup {...item} key={item.label} onNavigate={onNavigate} />
+  ));
 
   const handleLogout = () => {
     clearAuth();

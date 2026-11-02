@@ -25,6 +25,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core';
+import { TakePhotoButton } from '@/components/TakePhotoButton/TakePhotoButton';
 import { recipePath, Routes } from '@/helpers/constants';
 import { getErrorMessage } from '@/helpers/errors';
 import {
@@ -35,6 +36,7 @@ import {
   sendImport,
   toImportUrl,
 } from '@/helpers/imports';
+import { prepareImages } from '@/helpers/prepareImage';
 import { ImportDraft, ImportResult } from '@/types/recipe';
 
 export type ImportSource = 'url' | 'image';
@@ -148,9 +150,11 @@ export function ImportRecipe({
   };
 
   // In the order chosen, which is the page order
-  const choosePhotos = (files: File[]) => {
-    setPhotos(files);
-    setError(files.length ? checkPhotos(files) : null);
+  // Photos too big to upload, such as from a phone camera, are made smaller first
+  const choosePhotos = async (files: File[]) => {
+    const prepared = await prepareImages(files);
+    setPhotos(prepared);
+    setError(prepared.length ? checkPhotos(prepared) : null);
   };
 
   // Photos can be dropped anywhere on the panel
@@ -236,7 +240,7 @@ export function ImportRecipe({
               <FileInput
                 multiple
                 label="Photos of one recipe"
-                description={`Up to ${MAX_IMAGES_PER_RECIPE} pages, chosen in page order. JPEG, PNG, GIF or WebP, up to 5 MB each. You can also drop them here.`}
+                description={`Up to ${MAX_IMAGES_PER_RECIPE} pages, in page order. JPEG, PNG, GIF or WebP. Big photos are made smaller to fit. You can also drop them here.`}
                 placeholder="Choose photos"
                 accept={IMAGE_TYPES.join(',')}
                 leftSection={<IconUpload size={16} />}
@@ -248,6 +252,12 @@ export function ImportRecipe({
               />
               <ImportButton importing={importing} onCancel={cancel} />
             </Group>
+            {/* Each photo taken is added as the next page */}
+            <TakePhotoButton
+              mt="sm"
+              disabled={importing || photos.length >= MAX_IMAGES_PER_RECIPE}
+              onCapture={(photo) => choosePhotos([...photos, photo])}
+            />
           </form>
         </Tabs.Panel>
       </Tabs>

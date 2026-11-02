@@ -10,7 +10,7 @@ import { NavBar, NAVBAR_RAIL_WIDTH, NAVBAR_WIDTH } from '../Navigation/NavBar';
 
 export default function CoreLayout({ children }: { children: any }) {
   // On mobile the menu slides over the page, and the burger opens and closes it
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure();
   // On desktop the menu is always there. Pinned, it's full width and the page moves over for
   // it. Otherwise it's a strip of icons that expands over the page while hovered. Remembered
   // in this browser
@@ -54,7 +54,8 @@ export default function CoreLayout({ children }: { children: any }) {
 
       {/* NavBar draws its own border, so it moves with the menu as it expands */}
       <AppShell.Navbar withBorder={false}>
-        <NavBar rail={!pinned} />
+        {/* Choosing a page closes the mobile menu, so the page can be seen */}
+        <NavBar rail={!pinned} onNavigate={closeMobile} />
       </AppShell.Navbar>
 
       <AppShell.Main>{children}</AppShell.Main>

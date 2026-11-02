@@ -4,6 +4,36 @@
   align-items: center;
 }
 
+// The recipe page: back, title and actions in one row. On a phone the title gets a row to itself
+// below the others, so a long one has room and the buttons aren't squeezed
+.recipeHeader {
+  display: grid;
+  grid-template-columns: 1fr 5fr 1fr;
+  grid-template-areas: 'back title actions';
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+
+  .back {
+    grid-area: back;
+  }
+  .title {
+    grid-area: title;
+  }
+  .actions {
+    grid-area: actions;
+    justify-self: end;
+  }
+
+  // Below Mantine's sm breakpoint, where its hiddenFrom="sm" things show
+  @media (max-width: calc(#{mantine.$mantine-breakpoint-sm} - 0.1px)) {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'back actions'
+      'title title';
+    row-gap: var(--mantine-spacing-sm);
+  }
+}
+
 // Read out by screen readers but not shown, e.g. "Step 2:" next to the step's number badge
 .visuallyHidden {
   position: absolute;

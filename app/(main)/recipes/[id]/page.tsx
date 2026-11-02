@@ -88,11 +88,15 @@ export default async function RecipePage(props: PageProps) {
 
   return (
     <Container size="lg" px={0} pb="xl">
-      <div className={styles.Header}>
-        <BackButton />
-        <Title ta="center">{recipe.title}</Title>
+      <div className={styles.recipeHeader}>
+        <div className={styles.back}>
+          <BackButton />
+        </div>
+        <Title ta="center" className={styles.title}>
+          {recipe.title}
+        </Title>
         {!isAuthor && (
-          <Group justify="flex-end" gap="xs" wrap="nowrap">
+          <Group justify="flex-end" gap="xs" wrap="nowrap" className={styles.actions}>
             {canSuggest(recipe, userId) ? (
               <IconLink label="Suggest changes" href={suggestPath(recipe.id)} replace>
                 <IconMessagePlus size={18} />
@@ -116,7 +120,7 @@ export default async function RecipePage(props: PageProps) {
           </Group>
         )}
         {isAuthor && (
-          <Group justify="flex-end" gap="xs" wrap="nowrap">
+          <Group justify="flex-end" gap="xs" wrap="nowrap" className={styles.actions}>
             <IconLink
               label={
                 pendingSuggestions > 0

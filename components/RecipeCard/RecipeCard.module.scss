@@ -1,54 +1,155 @@
+// The image beside the title and description, then the stats and up to 3 tags underneath, across
+// the card. The whole card opens the recipe: the title is the link, stretched over the card (see
+// .link), so the save button and suggestions badge on top can still be used on their own
 .card {
+  position: relative;
   background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+  border: 1px solid transparent;
   border-radius: 6px;
   padding: 1rem;
-  display: flex;
-  gap: 1rem;
   width: 100%;
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  grid-template-areas:
+    'image title action'
+    'image description description'
+    'stats stats stats'
+    'tags tags tags';
+  grid-template-rows: auto 1fr auto auto;
+  column-gap: 1rem;
+  row-gap: 0.5rem;
+  transition:
+    border-color 100ms ease,
+    background-color 100ms ease;
 
-  .emptyImage {
-    min-width: 12rem;
-    width: 12rem;
-    height: 12rem;
-    border-radius: 10px;
-    background-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-5));
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  @include mantine.hover {
+    border-color: var(--mantine-color-orange-6);
   }
-  .content {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
 
-    .floatRight {
-      float: right;
-    }
-    /* Clear float */
-    .clearfix::after {
-      content: '';
-      display: table;
-      clear: both;
-    }
-
-    .iconInfo {
-      display: flex;
-      align-items: center;
-      font-size: 0.9rem;
-      gap: 5px;
-      background-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-9));
-      padding: 5px 10px;
-      border-radius: 10px;
-      &.category {
-        padding: 5px 20px;
-      }
-    }
-    .tag {
-      font-size: 0.9rem;
-      background-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-8));
-      padding: 5px 10px;
-      border-radius: 10px;
-    }
+  // The title link has the focus, but the whole card is what it opens
+  &:has(.link:focus-visible) {
+    outline: 2px solid var(--mantine-color-orange-6);
+    outline-offset: 2px;
   }
+
+  @media (max-width: calc(#{mantine.$mantine-breakpoint-sm} - 0.1px)) {
+    padding: 0.75rem;
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+    column-gap: 0.75rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+// The image, with the "Your recipe" icon over its top left corner
+.imageArea {
+  grid-area: image;
+  position: relative;
+  // Fills its column, and lines up with the top of the title
+  align-self: start;
+}
+
+.image {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-5));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// Above the card's link, so hovering it shows what it means. Not .onTop, whose position would
+// override this one
+.ownIcon {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 1;
+}
+
+.title {
+  grid-area: title;
+  overflow-wrap: anywhere;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+
+  // Stretches the link over the whole card
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+// Things that stay usable on top of the card's link
+.onTop {
+  position: relative;
+  z-index: 1;
+}
+
+// Beside the title: the save button on other people's recipes, or on the user's own, any
+// suggestions waiting, stacked
+.action {
+  grid-area: action;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.description {
+  grid-area: description;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.stats {
+  grid-area: stats;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.tags {
+  grid-area: tags;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.iconInfo {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  gap: 5px;
+  background-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-9));
+  padding: 4px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.tag {
+  font-size: 0.85rem;
+  background-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-8));
+  padding: 4px 10px;
+  border-radius: 10px;
+}
+
+.moreTags {
+  font-size: 0.85rem;
+  color: var(--mantine-color-dimmed);
 }
