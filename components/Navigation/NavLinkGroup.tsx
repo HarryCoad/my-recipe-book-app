@@ -57,7 +57,7 @@ export function NavLinkGroup({
         aria-current={active ? 'page' : undefined}
       >
         <Group justify="space-between" gap={0}>
-          <Box style={{ display: 'flex', alignItems: 'center' }}>
+          <Box style={{ display: 'flex', alignItems: 'center', gap: '1px' }}>
             <ThemeIcon variant="light" size={30}>
               <Icon size={18} />
             </ThemeIcon>

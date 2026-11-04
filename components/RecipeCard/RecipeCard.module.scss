@@ -1,6 +1,7 @@
-// The image beside the title and description, then the stats and up to 3 tags underneath, across
-// the card. The whole card opens the recipe: the title is the link, stretched over the card (see
-// .link), so the save button and suggestions badge on top can still be used on their own
+// The image beside the title and description, with the stats in the top right and up to 3 tags
+// underneath, across the card. Small screens have no room beside the title, so the stats go
+// below with the tags. The whole card opens the recipe: the title is the link, stretched over the
+// card (see .link), so the save button and suggestions badge on top can still be used on their own
 .card {
   position: relative;
   background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
@@ -9,13 +10,12 @@
   padding: 1rem;
   width: 100%;
   display: grid;
-  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  grid-template-columns: 8rem minmax(0, 1fr) auto auto;
   grid-template-areas:
-    'image title action'
-    'image description description'
-    'stats stats stats'
-    'tags tags tags';
-  grid-template-rows: auto 1fr auto auto;
+    'image title stats action'
+    'image description description description'
+    'tags tags tags tags';
+  grid-template-rows: auto 1fr auto;
   column-gap: 1rem;
   row-gap: 0.5rem;
   transition:
@@ -35,6 +35,12 @@
   @media (max-width: calc(#{mantine.$mantine-breakpoint-sm} - 0.1px)) {
     padding: 0.75rem;
     grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      'image title action'
+      'image description description'
+      'stats stats stats'
+      'tags tags tags';
+    grid-template-rows: auto 1fr auto auto;
     column-gap: 0.75rem;
   }
 
@@ -121,6 +127,13 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  // In the top right on large screens
+  justify-content: flex-end;
+  align-self: start;
+
+  @media (max-width: calc(#{mantine.$mantine-breakpoint-sm} - 0.1px)) {
+    justify-content: flex-start;
+  }
 }
 
 .tags {
