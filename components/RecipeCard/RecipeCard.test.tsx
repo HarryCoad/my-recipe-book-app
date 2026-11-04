@@ -34,7 +34,9 @@ describe('Recipe card', () => {
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveAccessibleName('Lentil soup');
     expect(links[0]).toHaveAttribute('href', '/recipes/r1');
-    expect(screen.queryByText('View Recipe')).not.toBeInTheDocument();
+    // Only looks like a button, so it isn't a second thing to tab to
+    expect(screen.queryByRole('button', { name: /view recipe/i })).not.toBeInTheDocument();
+    expect(screen.getByText('View recipe').closest('[aria-hidden="true"]')).not.toBeNull();
   });
 
   it('shows the description and stats, with what each number is', () => {

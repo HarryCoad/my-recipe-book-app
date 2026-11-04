@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import styles from './RecipeCard.module.scss';
 import {
+  IconChevronRight,
   IconFlame,
   IconMessage2,
   IconPizza,
@@ -9,7 +10,7 @@ import {
   IconToolsKitchen3,
   IconUser,
 } from '@tabler/icons-react';
-import { Text, ThemeIcon, VisuallyHidden } from '@mantine/core';
+import { Button, Text, ThemeIcon, VisuallyHidden } from '@mantine/core';
 import { BadgeLink } from '@/components/TooltipLink/TooltipLink';
 import { reviewSuggestionsPath } from '@/helpers/constants';
 import { convertMinutesToHoursAndMinutes } from '@/helpers/convertMin';
@@ -130,6 +131,19 @@ export function RecipeCard({ recipe, href, isOwn, action }: RecipeCardProps) {
           )}
         </div>
       )}
+
+      {/* Only looks like a button: it sits under the card's link, which is what gets clicked, so
+          it isn't a second link for keyboards and screen readers. Large screens only */}
+      <Button
+        component="span"
+        aria-hidden
+        variant="outline"
+        color="orange"
+        rightSection={<IconChevronRight stroke={2} size={15} />}
+        className={styles.view}
+      >
+        View recipe
+      </Button>
     </article>
   );
 }

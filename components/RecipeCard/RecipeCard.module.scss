@@ -14,7 +14,7 @@
   grid-template-areas:
     'image title stats action'
     'image description description description'
-    'tags tags tags tags';
+    'tags tags view view';
   grid-template-rows: auto 1fr auto;
   column-gap: 1rem;
   row-gap: 0.5rem;
@@ -24,6 +24,12 @@
 
   @include mantine.hover {
     border-color: var(--mantine-color-orange-6);
+
+    // The button can't be hovered itself (see .view), so it reacts to the card instead, using
+    // Mantine's own hover colour for the button
+    .view {
+      background-color: var(--button-hover);
+    }
   }
 
   // The title link has the focus, but the whole card is what it opens
@@ -160,6 +166,20 @@
   background-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-8));
   padding: 4px 10px;
   border-radius: 10px;
+}
+
+// Bottom right, on large screens. Tapping anywhere on the card is enough on a phone
+.view {
+  grid-area: view;
+  justify-self: end;
+  align-self: end;
+  // Mantine's Button is position: relative, which puts it above the card's link. Clicks go
+  // through to the link
+  pointer-events: none;
+
+  @media (max-width: calc(#{mantine.$mantine-breakpoint-sm} - 0.1px)) {
+    display: none;
+  }
 }
 
 .moreTags {
